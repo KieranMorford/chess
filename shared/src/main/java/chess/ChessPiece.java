@@ -11,7 +11,12 @@ import java.util.HashSet;
  */
 public class ChessPiece {
 
+    private final ChessGame.TeamColor pieceColor;
+    private final PieceType type;
+
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+        this.pieceColor = pieceColor;
+        this.type = type;
     }
 
     /**
@@ -30,14 +35,14 @@ public class ChessPiece {
      * @return Which team this chess piece belongs to
      */
     public ChessGame.TeamColor getTeamColor() {
-        throw new RuntimeException("Not implemented");
+        return pieceColor;
     }
 
     /**
      * @return which type of chess piece this piece is
      */
     public PieceType getPieceType() {
-        throw new RuntimeException("Not implemented");
+        return type;
     }
 
     /**
@@ -48,8 +53,31 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+        ChessPiece piece = board.getPiece(myPosition);
         var moves = new HashSet<ChessMove>();
-        moves.add(new ChessMove(new ChessPosition(5,4) , new ChessPosition(6,5)));
+        if (piece.getPieceType() == ChessPiece.PieceType.BISHOP) {
+            int x1 = 1;
+            while (myPosition.getRow() + x1 <= 8 && myPosition.getColumn() + x1 <= 8 && board.getPiece(new ChessPosition(myPosition.getRow() + x1, myPosition.getColumn() + x1)) == null ) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + x1, myPosition.getColumn() + x1), null));
+                x1++;
+            }
+            int x2 = 1;
+            while (myPosition.getRow() - x2 > 0 && myPosition.getColumn() + x2 <= 8 && board.getPiece(new ChessPosition(myPosition.getRow() - x2, myPosition.getColumn() + x2)) == null ) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - x2, myPosition.getColumn() + x2), null));
+                x2++;
+            }
+            int x3 = 1;
+            while (myPosition.getRow() + x3 <= 8 && myPosition.getColumn() - x3 > 0 && board.getPiece(new ChessPosition(myPosition.getRow() + x3, myPosition.getColumn() - x3)) == null ) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + x3, myPosition.getColumn() - x3), null));
+                x3++;
+            }
+            int x4 = 1;
+            while (myPosition.getRow() - x4 > 0 && myPosition.getColumn() - x4 > 0 && board.getPiece(new ChessPosition(myPosition.getRow() - x4, myPosition.getColumn() - x4)) == null ) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - x4, myPosition.getColumn() - x4), null));
+                x4++;
+            }
+        }
+
 
         return moves;
     }
