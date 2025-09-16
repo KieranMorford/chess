@@ -96,6 +96,47 @@ public class ChessPiece {
                 }
                 x4++;
             }
+        } else if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            if (myPosition.getRow() + 1 <= 8 && myPosition.getColumn() + 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1)) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1)).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 1), null));
+            }
+            if (myPosition.getRow() - 1 <= 8 && myPosition.getColumn() + 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1)) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1)).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 1), null));
+            }
+            if (myPosition.getRow() + 1 <= 8 && myPosition.getColumn() - 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1)) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1)).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 1), null));
+            }
+            if (myPosition.getRow() - 1 <= 8 && myPosition.getColumn() - 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1)) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1)).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 1), null));
+            }
+            if (myPosition.getRow() + 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn())) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn())).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn()), null));
+            }
+            if (myPosition.getRow() - 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn())) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn())).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn()), null));
+            }
+            if (myPosition.getColumn() + 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1)) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1)).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow(), myPosition.getColumn() + 1), null));
+            }
+            if (myPosition.getColumn() - 1 <= 8
+                    && (board.getPiece(new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1)) == null
+                    || board.getPiece(myPosition).getTeamColor() != board.getPiece(new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1)).getTeamColor())) {
+                moves.add(new ChessMove(myPosition, new ChessPosition(myPosition.getRow(), myPosition.getColumn() - 1), null));
+            }
         }
 
 
