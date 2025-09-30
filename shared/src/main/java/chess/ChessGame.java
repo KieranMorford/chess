@@ -81,18 +81,8 @@ public class ChessGame {
         throw new RuntimeException("Not implemented");
     }
 
-    /**
-     * Determines if the given team is in check
-     *
-     * @param teamColor which team to check for check
-     * @return True if the specified team is in check
-     */
-    public boolean isInCheck(TeamColor teamColor) {
+    private ChessPosition findKing(TeamColor teamColor) {
         ChessPosition kingPosition = null;
-        TeamColor color = TeamColor.WHITE;
-        if (teamColor == TeamColor.WHITE) {
-            color = TeamColor.BLACK;
-        }
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition tempPosition = new ChessPosition(i, j);
@@ -103,6 +93,21 @@ public class ChessGame {
                     }
                 }
             }
+        }
+        return kingPosition;
+    }
+
+    /**
+     * Determines if the given team is in check
+     *
+     * @param teamColor which team to check for check
+     * @return True if the specified team is in check
+     */
+    public boolean isInCheck(TeamColor teamColor) {
+        ChessPosition kingPosition = findKing(teamColor);
+        TeamColor color = TeamColor.WHITE;
+        if (teamColor == TeamColor.WHITE) {
+            color = TeamColor.BLACK;
         }
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
@@ -130,21 +135,10 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        ChessPosition kingPosition = null;
+        var kingPosition = findKing(teamColor);
         TeamColor color = TeamColor.WHITE;
         if (teamColor == TeamColor.WHITE) {
             color = TeamColor.BLACK;
-        }
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition tempPosition = new ChessPosition(i, j);
-                if (board.getPiece(tempPosition) != null) {
-                    ChessPiece tempPiece = board.getPiece(tempPosition);
-                    if (tempPiece.getTeamColor() == teamColor && tempPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                        kingPosition = tempPosition;
-                    }
-                }
-            }
         }
         var kingMoves = validMoves(kingPosition);
         if (kingMoves.isEmpty()) {
@@ -176,7 +170,45 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        var kingPosition = findKing(teamColor);
+        TeamColor color = TeamColor.WHITE;
+        if (teamColor == TeamColor.WHITE) {
+            color = TeamColor.BLACK;
+        }
+        var kingMoves = validMoves(kingPosition);
+        if (kingMoves.isEmpty()) {
+            for (int i = 1; i <= 8; i++) {
+                for (int j = 1; j <= 8; j++) {
+                    ChessPosition tempPosition = new ChessPosition(i, j);
+                    if (board.getPiece(tempPosition) != null) {
+                        ChessPiece tempPiece = board.getPiece(tempPosition);
+                        if (tempPiece.getTeamColor() == color) {
+                            Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
+                            for (ChessMove move : moves) {
+                                if (move.getEndPosition().equals(kingPosition)) {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if (board.getPiece(tempPosition) != null) {
+                    ChessPiece tempPiece = board.getPiece(tempPosition);
+                    if (tempPiece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
+                        if (!moves.isEmpty()) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
