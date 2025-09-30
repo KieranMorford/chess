@@ -107,9 +107,9 @@ public class ChessBoard implements Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException(e);
         }
-        copy.board = new ChessPiece[board.length][board[0].length];
-        for (int i = 0; i < board.length; i++) {
-            for (int j = 0; j < board[i].length; j++) {
+        copy.board = new ChessPiece[8][8];
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
                 copy.board[i][j] = board[i][j]; // or clone if mutable
             }
         }
