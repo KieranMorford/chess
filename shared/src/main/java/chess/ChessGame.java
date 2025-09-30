@@ -1,6 +1,8 @@
 package chess;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -51,7 +53,21 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        var moves = board.getPiece(startPosition).pieceMoves(board, startPosition);
+        var tempPiece = board.getPiece(startPosition);
+        var moves = tempPiece.pieceMoves(board, startPosition);
+        Collection<ChessMove> invalidMoves = new HashSet<ChessMove>();
+        for (ChessMove move : moves) {
+            var tempBoard = board.clone();
+            board.addPiece(move.getEndPosition(), tempPiece);
+            board.removePiece(startPosition);
+            if (isInCheck(tempPiece.getTeamColor())) {
+                invalidMoves.add(move);
+            }
+            board = tempBoard.clone();
+        }
+        for (ChessMove move : invalidMoves) {
+            moves.remove(move);
+        }
         return moves;
     }
 
@@ -80,21 +96,25 @@ public class ChessGame {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition tempPosition = new ChessPosition(i, j);
-                ChessPiece tempPiece = board.getPiece(tempPosition);
-                if (tempPiece.getTeamColor() == teamColor && tempPiece.getPieceType() == ChessPiece.PieceType.KING) {
-                    kingPosition = tempPosition;
+                if (board.getPiece(tempPosition) != null) {
+                    ChessPiece tempPiece = board.getPiece(tempPosition);
+                    if (tempPiece.getTeamColor() == teamColor && tempPiece.getPieceType() == ChessPiece.PieceType.KING) {
+                        kingPosition = tempPosition;
+                    }
                 }
             }
         }
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
                 ChessPosition tempPosition = new ChessPosition(i, j);
-                ChessPiece tempPiece = board.getPiece(tempPosition);
-                if (tempPiece.getTeamColor() == color) {
-                    Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
-                    for (ChessMove move : moves) {
-                        if (move.getEndPosition() == kingPosition) {
-                            return true;
+                if (board.getPiece(tempPosition) != null) {
+                    ChessPiece tempPiece = board.getPiece(tempPosition);
+                    if (tempPiece.getTeamColor() == color) {
+                        Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
+                        for (ChessMove move : moves) {
+                            if (move.getEndPosition().equals(kingPosition)) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -130,7 +150,7 @@ public class ChessGame {
      * @param board the new board to use
      */
     public void setBoard(ChessBoard board) {
-        throw new RuntimeException("Not implemented");
+        this.board = board;
     }
 
     /**
