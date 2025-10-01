@@ -19,6 +19,7 @@ public class ChessGame {
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
@@ -140,19 +141,30 @@ public class ChessGame {
         if (teamColor == TeamColor.WHITE) {
             color = TeamColor.BLACK;
         }
-        var kingMoves = validMoves(kingPosition);
-        if (kingMoves.isEmpty()) {
-            for (int i = 1; i <= 8; i++) {
-                for (int j = 1; j <= 8; j++) {
-                    ChessPosition tempPosition = new ChessPosition(i, j);
-                    if (board.getPiece(tempPosition) != null) {
-                        ChessPiece tempPiece = board.getPiece(tempPosition);
-                        if (tempPiece.getTeamColor() == color) {
-                            Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
-                            for (ChessMove move : moves) {
-                                if (move.getEndPosition().equals(kingPosition)) {
-                                    return true;
-                                }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if (board.getPiece(tempPosition) != null) {
+                    ChessPiece tempPiece = board.getPiece(tempPosition);
+                    if (tempPiece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> moves = validMoves(tempPosition);
+                        if (!moves.isEmpty()) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if (board.getPiece(tempPosition) != null) {
+                    ChessPiece tempPiece = board.getPiece(tempPosition);
+                    if (tempPiece.getTeamColor() == color) {
+                        Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
+                        for (ChessMove move : moves) {
+                            if (move.getEndPosition().equals(kingPosition)) {
+                                return true;
                             }
                         }
                     }
@@ -160,6 +172,7 @@ public class ChessGame {
             }
         }
         return false;
+
     }
 
     /**
@@ -175,20 +188,15 @@ public class ChessGame {
         if (teamColor == TeamColor.WHITE) {
             color = TeamColor.BLACK;
         }
-        var kingMoves = validMoves(kingPosition);
-        if (kingMoves.isEmpty()) {
-            for (int i = 1; i <= 8; i++) {
-                for (int j = 1; j <= 8; j++) {
-                    ChessPosition tempPosition = new ChessPosition(i, j);
-                    if (board.getPiece(tempPosition) != null) {
-                        ChessPiece tempPiece = board.getPiece(tempPosition);
-                        if (tempPiece.getTeamColor() == color) {
-                            Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
-                            for (ChessMove move : moves) {
-                                if (move.getEndPosition().equals(kingPosition)) {
-                                    return false;
-                                }
-                            }
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if (board.getPiece(tempPosition) != null) {
+                    ChessPiece tempPiece = board.getPiece(tempPosition);
+                    if (tempPiece.getTeamColor() == teamColor) {
+                        Collection<ChessMove> moves = validMoves(tempPosition);
+                        if (!moves.isEmpty()) {
+                            return false;
                         }
                     }
                 }
@@ -199,16 +207,57 @@ public class ChessGame {
                 ChessPosition tempPosition = new ChessPosition(i, j);
                 if (board.getPiece(tempPosition) != null) {
                     ChessPiece tempPiece = board.getPiece(tempPosition);
-                    if (tempPiece.getTeamColor() == teamColor) {
+                    if (tempPiece.getTeamColor() == color) {
                         Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
-                        if (!moves.isEmpty()) {
-                            return false;
+                        for (ChessMove move : moves) {
+                            if (move.getEndPosition().equals(kingPosition)) {
+                                return false;
+                            }
                         }
                     }
                 }
             }
         }
         return true;
+//        var kingPosition = findKing(teamColor);
+//        TeamColor color = TeamColor.WHITE;
+//        if (teamColor == TeamColor.WHITE) {
+//            color = TeamColor.BLACK;
+//        }
+//        var kingMoves = validMoves(kingPosition);
+//        if (kingMoves.isEmpty()) {
+//            for (int i = 1; i <= 8; i++) {
+//                for (int j = 1; j <= 8; j++) {
+//                    ChessPosition tempPosition = new ChessPosition(i, j);
+//                    if (board.getPiece(tempPosition) != null) {
+//                        ChessPiece tempPiece = board.getPiece(tempPosition);
+//                        if (tempPiece.getTeamColor() == color) {
+//                            Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
+//                            for (ChessMove move : moves) {
+//                                if (move.getEndPosition().equals(kingPosition)) {
+//                                    return false;
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        for (int i = 1; i <= 8; i++) {
+//            for (int j = 1; j <= 8; j++) {
+//                ChessPosition tempPosition = new ChessPosition(i, j);
+//                if (board.getPiece(tempPosition) != null) {
+//                    ChessPiece tempPiece = board.getPiece(tempPosition);
+//                    if (tempPiece.getTeamColor() == teamColor) {
+//                        Collection<ChessMove> moves = tempPiece.pieceMoves(board, tempPosition);
+//                        if (!moves.isEmpty()) {
+//                            return false;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return true;
     }
 
     /**
