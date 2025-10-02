@@ -38,6 +38,7 @@ public class ChessBoard implements Cloneable {
      * position
      */
     public ChessPiece getPiece(ChessPosition position) {
+        if (board[position.getRow() - 1][position.getColumn() - 1] == null) return null;
         return board[position.getRow() - 1][position.getColumn() - 1];
     }
 
