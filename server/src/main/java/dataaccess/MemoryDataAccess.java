@@ -1,6 +1,7 @@
 package dataaccess;
 
-import datamodel.UserData;
+import model.AuthData;
+import model.UserData;
 import java.util.HashMap;
 
 public class MemoryDataAccess implements DataAccess {
@@ -26,5 +27,8 @@ public class MemoryDataAccess implements DataAccess {
 
     }
 
+    @Override
+    public void createAuth(AuthData authData) {
 
+    }
 }

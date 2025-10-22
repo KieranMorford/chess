@@ -1,9 +1,9 @@
 package server;
 
+import RequestResult.RegisterRequest;
 import com.google.gson.Gson;
-import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
-import datamodel.UserData;
+import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
@@ -24,11 +24,11 @@ public class Server {
         try {
             var serializer = new Gson();
             String reqJson = ctx.body();
-            var user = serializer.fromJson(reqJson, UserData.class);
+            var regReq = serializer.fromJson(reqJson, RegisterRequest.class);
 
-            var authData = userService.register(user);
+            var registerResult = userService.register(regReq);
 
-            ctx.result(serializer.toJson(authData));
+            ctx.result(serializer.toJson(registerResult));
         } catch (Exception ex) {
             var msg = String.format("Error: %s", ex.getMessage());
             ctx.status(403).result(msg);
