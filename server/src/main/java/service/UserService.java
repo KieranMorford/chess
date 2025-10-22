@@ -12,9 +12,9 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public AuthData register (UserData user) {
-        if (dataAccess) {
-
+    public AuthData register(UserData user) throws Exception {
+        if (dataAccess.getUser(user.username()) != null) {
+            throw new Exception("Username Already Taken");
         }
         dataAccess.createUser(user);
         var authData = new AuthData(user.username(), generateAuthToken());
@@ -22,7 +22,6 @@ public class UserService {
     }
 
     private String generateAuthToken () {
-//        return UUID.randomUUID().toString();
-        return "xyz";
+        return UUID.randomUUID().toString();
     }
 }

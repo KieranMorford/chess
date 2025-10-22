@@ -20,4 +20,11 @@ public class MemoryDataAccess implements DataAccess {
     public UserData getUser(String username) {
         return users.get(username);
     }
+
+    @Override
+    public void createGame(String gameName) {
+
+    }
+
+
 }
