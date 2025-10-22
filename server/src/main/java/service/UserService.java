@@ -1,5 +1,7 @@
 package service;
 
+import Exceptions.AlreadyTakenException;
+import Exceptions.BadRequestException;
 import RequestResult.RegisterRequest;
 import RequestResult.RegisterResult;
 import dataaccess.DataAccess;
@@ -15,9 +17,12 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public RegisterResult register(RegisterRequest regReq) throws Exception {
+    public RegisterResult register(RegisterRequest regReq) throws AlreadyTakenException, BadRequestException {
         if (dataAccess.getUser(regReq.username()) != null) {
-            throw new Exception("Username Already Taken");
+            throw new AlreadyTakenException("Username Already Taken");
+        }
+        if (regReq.username() == null || regReq.password() == null || regReq.email() == null) {
+            throw new BadRequestException("Bad Request");
         }
         dataAccess.createUser(new UserData(regReq.username(), regReq.password(), regReq.email()));
         var authToken = generateAuthToken();

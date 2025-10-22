@@ -1,5 +1,7 @@
 package server;
 
+import Exceptions.AlreadyTakenException;
+import Exceptions.BadRequestException;
 import RequestResult.RegisterRequest;
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
@@ -33,9 +35,12 @@ public class Server {
             var registerResult = userService.register(regReq);
 
             ctx.result(serializer.toJson(registerResult));
-        } catch (Exception ex) {
-            var msg = String.format("Error: %s", ex.getMessage());
-            ctx.status(403).result(msg);
+        } catch (AlreadyTakenException ex) {
+//            var msg = String.format("\"message\": \"Error: %s\"", ex.getMessage());
+            ctx.status(403);
+        } catch (BadRequestException ex) {
+            var msg = String.format("\"message\": \"Error: %s\"", ex.getMessage());
+            ctx.status(400).result(msg);
         }
     }
 
