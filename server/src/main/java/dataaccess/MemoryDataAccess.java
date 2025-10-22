@@ -6,10 +6,12 @@ import java.util.HashMap;
 
 public class MemoryDataAccess implements DataAccess {
     private final HashMap<String, UserData> users = new HashMap<>();
+    private final HashMap<String, AuthData> userAuth = new HashMap<>();
 
     @Override
     public void clear() {
         users.clear();
+        userAuth.clear();
     }
 
     @Override
@@ -29,6 +31,6 @@ public class MemoryDataAccess implements DataAccess {
 
     @Override
     public void createAuth(AuthData authData) {
-
+        userAuth.put(authData.username(), authData);
     }
 }

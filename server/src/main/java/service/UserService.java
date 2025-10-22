@@ -27,6 +27,10 @@ public class UserService {
         return regRes;
     }
 
+    public void clear() {
+        dataAccess.clear();
+    }
+
     private String generateAuthToken () {
         return UUID.randomUUID().toString();
     }

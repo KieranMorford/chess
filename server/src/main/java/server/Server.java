@@ -6,6 +6,7 @@ import dataaccess.MemoryDataAccess;
 import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
+import org.jetbrains.annotations.NotNull;
 import service.UserService;
 
 public class Server {
@@ -14,8 +15,11 @@ public class Server {
     private final UserService userService;
 
     public Server() {
-        javalin = Javalin.create(config -> config.staticFiles.add("web"));
-        userService = new UserService(new MemoryDataAccess());
+        javalin = Javalin.create(config -> config.staticFiles.add("web"))
+                .post("/user", this::register)
+                .delete("/db", this::delete);
+        var memDA = new MemoryDataAccess();
+        userService = new UserService(memDA);
         // Register your endpoints and exception handlers here.
 
     }
@@ -33,6 +37,10 @@ public class Server {
             var msg = String.format("Error: %s", ex.getMessage());
             ctx.status(403).result(msg);
         }
+    }
+
+    private void delete(Context ctx) {
+        userService.clear();
     }
 
     public int run(int desiredPort) {
