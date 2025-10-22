@@ -11,6 +11,9 @@ import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
 import service.UserService;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Server {
 
     private final Javalin javalin;
@@ -27,20 +30,22 @@ public class Server {
     }
 
     private void register(Context ctx) {
+        var serializer = new Gson();
         try {
-            var serializer = new Gson();
             String reqJson = ctx.body();
             var regReq = serializer.fromJson(reqJson, RegisterRequest.class);
 
             var registerResult = userService.register(regReq);
 
             ctx.result(serializer.toJson(registerResult));
+        }  catch (BadRequestException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(400).result(serializer.toJson(exJson));
         } catch (AlreadyTakenException ex) {
-//            var msg = String.format("\"message\": \"Error: %s\"", ex.getMessage());
-            ctx.status(403);
-        } catch (BadRequestException ex) {
-            var msg = String.format("\"message\": \"Error: %s\"", ex.getMessage());
-            ctx.status(400).result(msg);
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(403).result(serializer.toJson(exJson));
         }
     }
 
