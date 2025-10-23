@@ -4,6 +4,7 @@ import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
 import RequestResult.LoginRequest;
+import RequestResult.LogoutRequest;
 import RequestResult.RegisterRequest;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
@@ -28,7 +29,7 @@ class UserServiceTest {
         RegisterRequest regReq1 = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         RegisterRequest regReq2 = new RegisterRequest("link","zelda","kord@gmail.com");
         UserService userService = new UserService(new MemoryDataAccess());
-        var regRes1 = userService.register(regReq1);
+        userService.register(regReq1);
         assertThrows(AlreadyTakenException.class, () -> {userService.register(regReq2);});
     }
 
@@ -43,7 +44,7 @@ class UserServiceTest {
     void loginPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         UserService userService = new UserService(new MemoryDataAccess());
-        var regRes = userService.register(regReq);
+        userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);
         assertEquals("link", logRes.username());
@@ -65,6 +66,30 @@ class UserServiceTest {
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest(null,"kronos");
         assertThrows(BadRequestException.class, () -> {userService.login(logReq);});
+    }
+
+    @Test
+    void logoutPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        LogoutRequest logoReq = new LogoutRequest(logRes.authToken());
+        userService.logout(logoReq);
+        assertThrows(UnauthorizedException.class, () -> {userService.logout(logoReq);});
+    }
+
+    @Test
+    void logoutUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        userService.register(regReq);
+        new LoginRequest("link","kronos");
+        LogoutRequest logoReq = new LogoutRequest("notAuthToken");
+        assertThrows(UnauthorizedException.class, () -> {userService.logout(logoReq);});
     }
 
     @Test

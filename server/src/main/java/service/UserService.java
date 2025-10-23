@@ -3,10 +3,7 @@ package service;
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
-import RequestResult.LoginRequest;
-import RequestResult.LoginResult;
-import RequestResult.RegisterRequest;
-import RequestResult.RegisterResult;
+import RequestResult.*;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
@@ -47,6 +44,13 @@ public class UserService {
         dataAccess.createAuth(authData);
         var logRes = new LoginResult(logReq.username(), authToken);
         return logRes;
+    }
+
+    public void logout(LogoutRequest logoReq) throws UnauthorizedException {
+        if (logoReq == null || dataAccess.getAuth(logoReq.authToken()) == null) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        dataAccess.deleteAuth(logoReq.authToken());
     }
 
     public void clear() {

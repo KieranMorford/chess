@@ -4,6 +4,7 @@ import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
 import RequestResult.LoginRequest;
+import RequestResult.LogoutRequest;
 import RequestResult.RegisterRequest;
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
@@ -25,6 +26,7 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
+                .delete("session", this::logout)
                 .delete("/db", this::delete);
         var memDA = new MemoryDataAccess();
         userService = new UserService(memDA);
@@ -65,6 +67,22 @@ public class Server {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
             ctx.status(400).result(serializer.toJson(exJson));
+        } catch (UnauthorizedException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(401).result(serializer.toJson(exJson));
+        }
+    }
+
+    private void logout(Context ctx) {
+        var serializer = new Gson();
+        try {
+            String reqJson = ctx.body();
+            var logoReq = serializer.fromJson(reqJson, LogoutRequest.class);
+
+            userService.logout(logoReq);
+
+            ctx.result(serializer.toJson(null));
         } catch (UnauthorizedException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
