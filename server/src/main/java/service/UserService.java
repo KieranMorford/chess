@@ -39,8 +39,7 @@ public class UserService {
         if (logReq.username() == null || logReq.password() == null) {
             throw new BadRequestException("Bad Request");
         }
-        var test = dataAccess.getUser(logReq.username()).password();
-        if (!dataAccess.getUser(logReq.username()).password().equals(logReq.password())) {
+        if (dataAccess.getUser(logReq.username()) == null || !dataAccess.getUser(logReq.username()).password().equals(logReq.password())) {
             throw new UnauthorizedException("Unauthorized");
         }
         var authToken = generateAuthToken();

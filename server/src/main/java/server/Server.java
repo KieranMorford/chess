@@ -41,7 +41,7 @@ public class Server {
             var registerResult = userService.register(regReq);
 
             ctx.result(serializer.toJson(registerResult));
-        }  catch (BadRequestException ex) {
+        } catch (BadRequestException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
             ctx.status(400).result(serializer.toJson(exJson));
@@ -61,7 +61,7 @@ public class Server {
             var loginResult = userService.login(logReq);
 
             ctx.result(serializer.toJson(loginResult));
-        }  catch (BadRequestException ex) {
+        } catch (BadRequestException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
             ctx.status(400).result(serializer.toJson(exJson));
