@@ -142,7 +142,7 @@ public class Server {
             String authToken = ctx.header("authorization");
             String reqJson = ctx.body();
             var preJGReq = serializer.fromJson(reqJson, PreJoinRequest.class);
-            if (preJGReq.gameID() == null) {
+            if (preJGReq.gameID() == null || preJGReq.playerColor() == null) {
                 throw new BadRequestException("Bad Request");
             }
             var jGReq = new JoinGameRequest(null, null,0);
