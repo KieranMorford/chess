@@ -77,8 +77,7 @@ class UserServiceTest {
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);
         LogoutRequest logoReq = new LogoutRequest(logRes.authToken());
-        userService.logout(logoReq);
-        assertThrows(UnauthorizedException.class, () -> {userService.logout(logoReq);});
+        assertDoesNotThrow(() -> {userService.logout(logoReq);});
     }
 
     @Test

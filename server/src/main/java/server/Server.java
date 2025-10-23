@@ -26,7 +26,8 @@ public class Server {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
-                .delete("session", this::logout)
+                .delete("/session", this::logout)
+//                .get("/game", this::getGameList)
                 .delete("/db", this::delete);
         var memDA = new MemoryDataAccess();
         userService = new UserService(memDA);
@@ -77,8 +78,8 @@ public class Server {
     private void logout(Context ctx) {
         var serializer = new Gson();
         try {
-            String reqJson = ctx.body();
-            var logoReq = serializer.fromJson(reqJson, LogoutRequest.class);
+            String reqJson = ctx.header("authorization");
+            var logoReq = new LogoutRequest(reqJson);
 
             userService.logout(logoReq);
 
