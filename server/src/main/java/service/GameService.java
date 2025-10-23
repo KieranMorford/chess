@@ -23,7 +23,8 @@ public class GameService {
 //    }
 
     public NewGameResult newGame(NewGameRequest nGReq) throws UnauthorizedException, BadRequestException {
-        if (nGReq.authToken() == null || nGReq.gameName() == null) {
+        var test = nGReq.gameName();
+        if (nGReq.authToken() == null || nGReq.gameName() == null || nGReq.gameName().equals("{}")) {
             throw new BadRequestException("Bad Request");
         }
         if (dataAccess.getAuth(nGReq.authToken()) == null) {

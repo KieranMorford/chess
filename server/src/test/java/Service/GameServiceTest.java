@@ -45,4 +45,17 @@ class GameServiceTest {
         assertThrows(BadRequestException.class, () -> {gameService.newGame(nGReq1);});
         assertThrows(BadRequestException.class, () -> {gameService.newGame(nGReq2);});
     }
+
+    @Test
+    void newGameUnauthorizedTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq = new NewGameRequest("BadAuthToken", "First Strand-type Game");
+        assertThrows(UnauthorizedException.class, () -> {gameService.newGame(nGReq);});
+    }
 }
