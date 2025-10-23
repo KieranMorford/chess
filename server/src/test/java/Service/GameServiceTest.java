@@ -3,9 +3,11 @@ package Service;
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
+import RequestResult.JoinGameRequest;
 import RequestResult.LoginRequest;
 import RequestResult.NewGameRequest;
 import RequestResult.RegisterRequest;
+import chess.ChessGame;
 import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
 import service.GameService;
@@ -59,5 +61,44 @@ class GameServiceTest {
         assertThrows(UnauthorizedException.class, () -> {gameService.newGame(nGReq);});
     }
 
+    @Test
+    void joinGamePositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+
+    }
+
+    @Test
+    void joinGameBadRequestTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
+        gameService.newGame(nGReq);
+        var jGReq1 = new JoinGameRequest(logRes.authToken(), ChessGame.TeamColor.WHITE, 5);
+        var jGReq2 = new JoinGameRequest(logRes.authToken(), null, 1);
+        assertThrows(BadRequestException.class, () -> {gameService.joinGame(jGReq1);});
+        assertThrows(BadRequestException.class, () -> {gameService.joinGame(jGReq2);});
+    }
+
+    @Test
+    void joinGameUnauthorizedTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
+        gameService.newGame(nGReq);
+        var jGReq = new JoinGameRequest("BadAuthToken", ChessGame.TeamColor.WHITE, 1);
+        assertThrows(UnauthorizedException.class, () -> {gameService.joinGame(jGReq);});
+    }
+
+    @Test
+    void joinGameAlreadyTakenTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {}
 
 }

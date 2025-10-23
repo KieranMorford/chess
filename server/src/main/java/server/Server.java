@@ -142,6 +142,9 @@ public class Server {
             String authToken = ctx.header("authorization");
             String reqJson = ctx.body();
             var preJGReq = serializer.fromJson(reqJson, PreJoinRequest.class);
+            if (preJGReq.gameID() == null) {
+                throw new BadRequestException("Bad Request");
+            }
             var jGReq = new JoinGameRequest(null, null,0);
             if (preJGReq.playerColor().equals("WHITE")) {
                 jGReq = new JoinGameRequest(authToken, ChessGame.TeamColor.WHITE, Integer.parseInt(preJGReq.gameID()));

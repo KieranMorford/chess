@@ -48,4 +48,9 @@ public class SQLDataAccess implements DataAccess {
     public GameData createGame(String gameName, int gameID) {
         return null;
     }
+
+    @Override
+    public GameData getGame(int gameID) {
+        return null;
+    }
 }

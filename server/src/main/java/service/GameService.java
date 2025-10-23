@@ -37,7 +37,7 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest jGReq) throws UnauthorizedException, BadRequestException, AlreadyTakenException {
-        if (jGReq.authToken() == null || jGReq.playerColor() == null || jGReq.gameID() == 0) {
+        if (jGReq.authToken() == null || jGReq.playerColor() == null || jGReq.gameID() == 0 || dataAccess.getGame(jGReq.gameID()) == null) {
             throw new BadRequestException("Bad Request");
         }
         if (dataAccess.getAuth(jGReq.authToken()) == null) {
