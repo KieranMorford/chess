@@ -1,5 +1,6 @@
 package service;
 
+import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
 import RequestResult.JoinGameRequest;
@@ -24,7 +25,6 @@ public class GameService {
 //    }
 
     public NewGameResult newGame(NewGameRequest nGReq) throws UnauthorizedException, BadRequestException {
-        var test = nGReq.gameName();
         if (nGReq.authToken() == null || nGReq.gameName() == null || nGReq.gameName().equals("{}")) {
             throw new BadRequestException("Bad Request");
         }
@@ -36,7 +36,7 @@ public class GameService {
         return nGRes;
     }
 
-    public void joinGame(JoinGameRequest jGReq) {
+    public void joinGame(JoinGameRequest jGReq) throws UnauthorizedException, BadRequestException, AlreadyTakenException {
 
     }
 
