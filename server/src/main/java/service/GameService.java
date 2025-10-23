@@ -2,6 +2,7 @@ package service;
 
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
+import RequestResult.JoinGameRequest;
 import RequestResult.NewGameRequest;
 import RequestResult.NewGameResult;
 import dataaccess.DataAccess;
@@ -33,6 +34,10 @@ public class GameService {
         var gameData = dataAccess.createGame(nGReq.gameName(), generateGameId());
         var nGRes = new NewGameResult(gameData.gameID());
         return nGRes;
+    }
+
+    public void joinGame(JoinGameRequest jGReq) {
+
     }
 
     public int generateGameId() {

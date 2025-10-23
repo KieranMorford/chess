@@ -58,4 +58,6 @@ class GameServiceTest {
         NewGameRequest nGReq = new NewGameRequest("BadAuthToken", "First Strand-type Game");
         assertThrows(UnauthorizedException.class, () -> {gameService.newGame(nGReq);});
     }
+
+
 }
