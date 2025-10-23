@@ -6,6 +6,7 @@ import Exceptions.UnauthorizedException;
 import RequestResult.*;
 import dataaccess.DataAccess;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 
 import java.util.UUID;

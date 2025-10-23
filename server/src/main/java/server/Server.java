@@ -3,15 +3,14 @@ package server;
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
-import RequestResult.LoginRequest;
-import RequestResult.LogoutRequest;
-import RequestResult.RegisterRequest;
+import RequestResult.*;
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
 import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
 import org.jetbrains.annotations.NotNull;
+import service.GameService;
 import service.UserService;
 
 import java.util.HashMap;
@@ -20,17 +19,22 @@ import java.util.Map;
 public class Server {
 
     private final Javalin javalin;
+    private final MemoryDataAccess memoryDataAccess;
     private final UserService userService;
+    private final GameService gameService;
+
 
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
                 .delete("/session", this::logout)
-//                .get("/game", this::getGameList)
+                .get("/game", this::getGameList)
+                .post("/game", this::newGame)
                 .delete("/db", this::delete);
-        var memDA = new MemoryDataAccess();
-        userService = new UserService(memDA);
+        memoryDataAccess = new MemoryDataAccess();
+        userService = new UserService(memoryDataAccess);
+        gameService = new GameService(memoryDataAccess);
         // Register your endpoints and exception handlers here.
 
     }
@@ -84,6 +88,43 @@ public class Server {
             userService.logout(logoReq);
 
             ctx.result(serializer.toJson(null));
+        } catch (UnauthorizedException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(401).result(serializer.toJson(exJson));
+        }
+    }
+
+    private void getGameList(Context ctx) {
+//        var serializer = new Gson();
+//        try {
+//            String reqJson = ctx.header("authorization");
+//            var gListReq = new GameListRequest(reqJson);
+//
+//            userService.(gListReq);
+//
+//            ctx.result(serializer.toJson(null));
+//        } catch (UnauthorizedException ex) {
+//            Map<String, String> exJson = new HashMap<>();
+//            exJson.put("message", "Error: " + ex.getMessage());
+//            ctx.status(401).result(serializer.toJson(exJson));
+//        }
+    }
+
+    private void newGame(Context ctx) {
+        var serializer = new Gson();
+        try {
+            String authToken = ctx.header("authorization");
+            String reqJson = ctx.body();
+            var nGReq = new NewGameRequest(authToken, reqJson);
+
+            var newGameResult = gameService.newGame(nGReq);
+
+            ctx.result(serializer.toJson(newGameResult));
+        } catch (BadRequestException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(400).result(serializer.toJson(exJson));
         } catch (UnauthorizedException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());

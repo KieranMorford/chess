@@ -1,9 +1,11 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class MemoryDataAccess implements DataAccess {
     private final HashMap<String, UserData> users = new HashMap<>();
@@ -43,7 +45,15 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createGame(String gameName) {
-
+    public GameData listGames(String authToken) {
+        return games.get(authToken);
     }
+
+    @Override
+    public GameData createGame(String gameName, int gameID) {
+        var game = new GameData(gameID, null, null, gameName, new ChessGame());
+        games.put(Integer.toString(game.gameID()), game);
+        return game;
+    }
+
 }

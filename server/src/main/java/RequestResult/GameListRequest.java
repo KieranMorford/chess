@@ -1,5 +1,5 @@
 package RequestResult;
 
-public record LogoutRequest(
+public record GameListRequest(
         String authToken
 ) {}
