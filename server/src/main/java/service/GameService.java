@@ -37,7 +37,12 @@ public class GameService {
     }
 
     public void joinGame(JoinGameRequest jGReq) throws UnauthorizedException, BadRequestException, AlreadyTakenException {
-
+        if (jGReq.authToken() == null || jGReq.playerColor() == null || jGReq.gameID() == 0) {
+            throw new BadRequestException("Bad Request");
+        }
+        if (dataAccess.getAuth(jGReq.authToken()) == null) {
+            throw new UnauthorizedException("Unauthorized");
+        }
     }
 
     public int generateGameId() {

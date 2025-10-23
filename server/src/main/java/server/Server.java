@@ -151,6 +151,7 @@ public class Server {
 
             gameService.joinGame(jGReq);
 
+            ctx.result(serializer.toJson(null));
         } catch (BadRequestException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
