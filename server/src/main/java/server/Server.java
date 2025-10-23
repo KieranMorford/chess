@@ -2,6 +2,7 @@ package server;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
+import Exceptions.UnauthorizedException;
 import RequestResult.LoginRequest;
 import RequestResult.RegisterRequest;
 import com.google.gson.Gson;
@@ -64,10 +65,10 @@ public class Server {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
             ctx.status(400).result(serializer.toJson(exJson));
-        } catch (AlreadyTakenException ex) {
+        } catch (UnauthorizedException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(403).result(serializer.toJson(exJson));
+            ctx.status(401).result(serializer.toJson(exJson));
         }
     }
 

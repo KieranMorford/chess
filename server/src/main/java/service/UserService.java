@@ -2,6 +2,7 @@ package service;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
+import Exceptions.UnauthorizedException;
 import RequestResult.LoginRequest;
 import RequestResult.LoginResult;
 import RequestResult.RegisterRequest;
@@ -34,10 +35,11 @@ public class UserService {
         return regRes;
     }
 
-    public LoginResult login(LoginRequest logReq) throws AlreadyTakenException, BadRequestException {
+    public LoginResult login(LoginRequest logReq) throws UnauthorizedException, BadRequestException {
         if (logReq.username() == null || logReq.password() == null) {
             throw new BadRequestException("Bad Request");
         }
+        var test = dataAccess.getUser(logReq.username()).password();
         if (!dataAccess.getUser(logReq.username()).password().equals(logReq.password())) {
             throw new UnauthorizedException("Unauthorized");
         }

@@ -2,6 +2,7 @@ package Service;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
+import Exceptions.UnauthorizedException;
 import RequestResult.LoginRequest;
 import RequestResult.RegisterRequest;
 import dataaccess.DataAccess;
@@ -39,13 +40,31 @@ class UserServiceTest {
     }
 
     @Test
-    void loginPositiveTest() throws AlreadyTakenException, BadRequestException {
+    void loginPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         UserService userService = new UserService(new MemoryDataAccess());
         var regRes = userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);
         assertEquals("link", logRes.username());
+    }
+
+    @Test
+    void loginUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        UserService userService = new UserService(new MemoryDataAccess());
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","krony");
+        assertThrows(UnauthorizedException.class, () -> {userService.login(logReq);});
+    }
+
+    @Test
+    void loginBadRequestTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        UserService userService = new UserService(new MemoryDataAccess());
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest(null,"kronos");
+        assertThrows(BadRequestException.class, () -> {userService.login(logReq);});
     }
 
     @Test
