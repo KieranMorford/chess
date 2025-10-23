@@ -2,6 +2,8 @@ package service;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
+import RequestResult.LoginRequest;
+import RequestResult.LoginResult;
 import RequestResult.RegisterRequest;
 import RequestResult.RegisterResult;
 import dataaccess.DataAccess;
@@ -30,6 +32,20 @@ public class UserService {
         dataAccess.createAuth(authData);
         var regRes = new RegisterResult(regReq.username(), authToken);
         return regRes;
+    }
+
+    public LoginResult login(LoginRequest logReq) throws AlreadyTakenException, BadRequestException {
+        if (logReq.username() == null || logReq.password() == null) {
+            throw new BadRequestException("Bad Request");
+        }
+        if (!dataAccess.getUser(logReq.username()).password().equals(logReq.password())) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        var authToken = generateAuthToken();
+        var authData = new AuthData(logReq.username(), authToken);
+        dataAccess.createAuth(authData);
+        var logRes = new LoginResult(logReq.username(), authToken);
+        return logRes;
     }
 
     public void clear() {

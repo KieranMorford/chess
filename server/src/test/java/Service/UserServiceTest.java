@@ -2,6 +2,7 @@ package Service;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
+import RequestResult.LoginRequest;
 import RequestResult.RegisterRequest;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
@@ -35,6 +36,16 @@ class UserServiceTest {
         RegisterRequest regReq = new RegisterRequest("link","kronos",null);
         UserService userService = new UserService(new MemoryDataAccess());
         assertThrows(BadRequestException.class, () -> {userService.register(regReq);});
+    }
+
+    @Test
+    void loginPositiveTest() throws AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        UserService userService = new UserService(new MemoryDataAccess());
+        var regRes = userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        assertEquals("link", logRes.username());
     }
 
     @Test

@@ -2,6 +2,7 @@ package server;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
+import RequestResult.LoginRequest;
 import RequestResult.RegisterRequest;
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
@@ -22,6 +23,7 @@ public class Server {
     public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
+                .post("/session", this::login)
                 .delete("/db", this::delete);
         var memDA = new MemoryDataAccess();
         userService = new UserService(memDA);
@@ -38,6 +40,26 @@ public class Server {
             var registerResult = userService.register(regReq);
 
             ctx.result(serializer.toJson(registerResult));
+        }  catch (BadRequestException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(400).result(serializer.toJson(exJson));
+        } catch (AlreadyTakenException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(403).result(serializer.toJson(exJson));
+        }
+    }
+
+    private void login(Context ctx) {
+        var serializer = new Gson();
+        try {
+            String reqJson = ctx.body();
+            var logReq = serializer.fromJson(reqJson, LoginRequest.class);
+
+            var loginResult = userService.login(logReq);
+
+            ctx.result(serializer.toJson(loginResult));
         }  catch (BadRequestException ex) {
             Map<String, String> exJson = new HashMap<>();
             exJson.put("message", "Error: " + ex.getMessage());
