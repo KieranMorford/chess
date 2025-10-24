@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameService {
     private final DataAccess dataAccess;
-    private final AtomicInteger GAME_ID_COUNTER = new AtomicInteger(1);
+    private final AtomicInteger gameIDCounter = new AtomicInteger(1);
 
     public GameService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
@@ -66,6 +66,6 @@ public class GameService {
     }
 
     public int generateGameId() {
-        return GAME_ID_COUNTER.getAndIncrement();
+        return gameIDCounter.getAndIncrement();
     }
 }
