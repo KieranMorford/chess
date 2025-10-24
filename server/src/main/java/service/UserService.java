@@ -1,12 +1,11 @@
 package service;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.UnauthorizedException;
-import RequestResult.*;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.UnauthorizedException;
+import requestresult.*;
 import dataaccess.DataAccess;
 import model.AuthData;
-import model.GameData;
 import model.UserData;
 
 import java.util.UUID;

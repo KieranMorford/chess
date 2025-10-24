@@ -1,12 +1,12 @@
 package service;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.UnauthorizedException;
-import RequestResult.LoginRequest;
-import RequestResult.LogoutRequest;
-import RequestResult.NewGameRequest;
-import RequestResult.RegisterRequest;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.UnauthorizedException;
+import requestresult.LoginRequest;
+import requestresult.LogoutRequest;
+import requestresult.NewGameRequest;
+import requestresult.RegisterRequest;
 import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
 

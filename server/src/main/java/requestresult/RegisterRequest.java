@@ -1,4 +1,4 @@
-package RequestResult;
+package requestresult;
 
 public record RegisterRequest(
         String username,

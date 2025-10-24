@@ -55,7 +55,7 @@ public class ChessGame {
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
         var tempPiece = board.getPiece(startPosition);
-        if (tempPiece == null) return null;
+        if (tempPiece == null) {return null;}
         var moves = tempPiece.pieceMoves(board, startPosition);
         Collection<ChessMove> invalidMoves = new HashSet<ChessMove>();
         for (ChessMove move : moves) {
@@ -84,7 +84,7 @@ public class ChessGame {
         var tempPiece = board.getPiece(move.getStartPosition());
         var moves = validMoves(move.getStartPosition());
         if (board.getPiece(move.getStartPosition()) != null) {
-            if (tempPiece.getTeamColor() != teamTurn) throw new InvalidMoveException("Invalid move!");
+            if (tempPiece.getTeamColor() != teamTurn) {throw new InvalidMoveException("Invalid move!");}
             if (!moves.isEmpty()) {
                 for (ChessMove tempMove : moves) {
                     if (tempMove.equals(move)) {

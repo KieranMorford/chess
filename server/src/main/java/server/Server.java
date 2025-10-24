@@ -1,23 +1,19 @@
 package server;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.UnauthorizedException;
-import RequestResult.*;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.UnauthorizedException;
+import requestresult.*;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
-import model.UserData;
 import io.javalin.*;
 import io.javalin.http.Context;
-import org.jetbrains.annotations.NotNull;
 import service.GameService;
 import service.UserService;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static chess.ChessGame.TeamColor.WHITE;
 
 public class Server {
 

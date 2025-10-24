@@ -1,4 +1,4 @@
-package RequestResult;
+package requestresult;
 
 public record PreJoinRequest(
         String playerColor,

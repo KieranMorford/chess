@@ -1,12 +1,13 @@
 package service;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.UnauthorizedException;
-import RequestResult.JoinGameRequest;
-import RequestResult.LoginRequest;
-import RequestResult.NewGameRequest;
-import RequestResult.RegisterRequest;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.UnauthorizedException;
+import org.junit.jupiter.api.AfterAll;
+import requestresult.JoinGameRequest;
+import requestresult.LoginRequest;
+import requestresult.NewGameRequest;
+import requestresult.RegisterRequest;
 import chess.ChessGame;
 import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
+    @AfterAll
+    static void tearDown() {
+
+    }
 
     @Test
     void newGamePositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
@@ -129,7 +134,7 @@ class GameServiceTest {
     }
 
     @Test
-    void ListGamesPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+    void listGamesPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -148,7 +153,7 @@ class GameServiceTest {
     }
 
     @Test
-    void ListGamesUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+    void listGamesUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);

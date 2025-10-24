@@ -1,17 +1,16 @@
 package service;
 
-import Exceptions.AlreadyTakenException;
-import Exceptions.BadRequestException;
-import Exceptions.UnauthorizedException;
-import RequestResult.GetGameListResult;
-import RequestResult.JoinGameRequest;
-import RequestResult.NewGameRequest;
-import RequestResult.NewGameResult;
+import exceptions.AlreadyTakenException;
+import exceptions.BadRequestException;
+import exceptions.UnauthorizedException;
+import requestresult.GetGameListResult;
+import requestresult.JoinGameRequest;
+import requestresult.NewGameRequest;
+import requestresult.NewGameResult;
 import chess.ChessGame;
 import dataaccess.DataAccess;
 import model.GameData;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameService {
