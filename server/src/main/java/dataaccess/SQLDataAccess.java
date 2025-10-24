@@ -4,6 +4,8 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.List;
+
 public class SQLDataAccess implements DataAccess {
     public SQLDataAccess() throws DataAccessException{
         DatabaseManager.createDatabase();
@@ -40,7 +42,7 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData listGames(String authToken) {
+    public List<GameData> listGames(String authToken) {
         return null;
     }
 
@@ -52,5 +54,10 @@ public class SQLDataAccess implements DataAccess {
     @Override
     public GameData getGame(int gameID) {
         return null;
+    }
+
+    @Override
+    public void updateGame(GameData gameData) {
+
     }
 }

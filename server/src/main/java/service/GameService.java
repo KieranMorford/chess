@@ -3,11 +3,15 @@ package service;
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
+import RequestResult.GetGameListResult;
 import RequestResult.JoinGameRequest;
 import RequestResult.NewGameRequest;
 import RequestResult.NewGameResult;
+import chess.ChessGame;
 import dataaccess.DataAccess;
+import model.GameData;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameService {
@@ -17,12 +21,15 @@ public class GameService {
     public GameService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
     }
-    //    public GameResult getGameList(LogoutRequest gListReq) throws UnauthorizedException {
-//        if (gListReq == null || dataAccess.getAuth(gListReq.authToken()) == null) {
-//            throw new UnauthorizedException("Unauthorized");
-//        }
-//        dataAccess.
-//    }
+
+    public GetGameListResult getGameList(String authToken) throws UnauthorizedException {
+        if (authToken == null || dataAccess.getAuth(authToken) == null) {
+            throw new UnauthorizedException("Unauthorized");
+        }
+        var gList = dataAccess.listGames(authToken);
+        var gLRes = new GetGameListResult(gList);
+        return gLRes;
+    }
 
     public NewGameResult newGame(NewGameRequest nGReq) throws UnauthorizedException, BadRequestException {
         if (nGReq.authToken() == null || nGReq.gameName() == null || nGReq.gameName().equals("{}")) {
@@ -43,6 +50,18 @@ public class GameService {
         if (dataAccess.getAuth(jGReq.authToken()) == null) {
             throw new UnauthorizedException("Unauthorized");
         }
+        if (jGReq.playerColor().equals(ChessGame.TeamColor.WHITE) && dataAccess.getGame(jGReq.gameID()).whiteUsername() != null) {
+            throw new AlreadyTakenException("White Already Taken");
+        }
+        var oldGame = dataAccess.getGame(jGReq.gameID());
+        var newGame = new GameData(oldGame.gameID(), oldGame.whiteUsername(), oldGame.blackUsername(), oldGame.gameName(), oldGame.game());
+        if(jGReq.playerColor().equals(ChessGame.TeamColor.WHITE)) {
+            newGame = new GameData(oldGame.gameID(), dataAccess.getAuth(jGReq.authToken()).username(), oldGame.blackUsername(), oldGame.gameName(), oldGame.game());
+        } else if(jGReq.playerColor().equals(ChessGame.TeamColor.BLACK)) {
+            newGame = new GameData(oldGame.gameID(),oldGame.whiteUsername(), dataAccess.getAuth(jGReq.authToken()).username(), oldGame.gameName(), oldGame.game());
+        }
+        dataAccess.updateGame(newGame);
+
     }
 
     public int generateGameId() {

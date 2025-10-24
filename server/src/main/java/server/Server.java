@@ -100,19 +100,18 @@ public class Server {
     }
 
     private void getGameList(Context ctx) {
-//        var serializer = new Gson();
-//        try {
-//            String reqJson = ctx.header("authorization");
-//            var gListReq = new GameListRequest(reqJson);
-//
-//            userService.(gListReq);
-//
-//            ctx.result(serializer.toJson(null));
-//        } catch (UnauthorizedException ex) {
-//            Map<String, String> exJson = new HashMap<>();
-//            exJson.put("message", "Error: " + ex.getMessage());
-//            ctx.status(401).result(serializer.toJson(exJson));
-//        }
+        var serializer = new Gson();
+        try {
+            String authToken = ctx.header("authorization");
+
+            var gGLRes = gameService.getGameList(authToken);
+
+            ctx.result(serializer.toJson(gGLRes));
+        } catch (UnauthorizedException ex) {
+            Map<String, String> exJson = new HashMap<>();
+            exJson.put("message", "Error: " + ex.getMessage());
+            ctx.status(401).result(serializer.toJson(exJson));
+        }
     }
 
     private void newGame(Context ctx) {

@@ -4,7 +4,10 @@ import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 public class MemoryDataAccess implements DataAccess {
@@ -45,8 +48,12 @@ public class MemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public GameData listGames(String authToken) {
-        return games.get(1);
+    public List<GameData> listGames(String authToken) {
+        if (userAuth.containsKey(authToken)) {
+            List<GameData> gamesList = new ArrayList<>(games.values());
+            return gamesList;
+        }
+        return null;
     }
 
     @Override
@@ -59,6 +66,11 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public GameData getGame(int gameID) {
         return games.get(gameID);
+    }
+
+    @Override
+    public void updateGame(GameData gameData) {
+        games.put(gameData.gameID(), gameData);
     }
 
 }

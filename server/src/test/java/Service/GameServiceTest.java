@@ -63,7 +63,18 @@ class GameServiceTest {
 
     @Test
     void joinGamePositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
-
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
+        gameService.newGame(nGReq);
+        var jGReq = new JoinGameRequest(logRes.authToken(), ChessGame.TeamColor.WHITE, 1);
+        gameService.joinGame(jGReq);
+        assertEquals("link", gameService.getGameList(logRes.authToken()).games().get(jGReq.gameID() - 1).whiteUsername());
     }
 
     @Test
@@ -99,6 +110,28 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameAlreadyTakenTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {}
+    void joinGameAlreadyTakenTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+        RegisterRequest regReq1 = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        RegisterRequest regReq2 = new RegisterRequest("zelda","flash","hrmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq1);
+        userService.register(regReq2);
+        LoginRequest logReq1 = new LoginRequest("link","kronos");
+        LoginRequest logReq2 = new LoginRequest("zelda","flash");
+        var logRes1 = userService.login(logReq1);
+        var logRes2 = userService.login(logReq2);
+        NewGameRequest nGReq = new NewGameRequest(logRes1.authToken(), "First Strand-type Game");
+        gameService.newGame(nGReq);
+        var jGReq1 = new JoinGameRequest(logRes1.authToken(), ChessGame.TeamColor.WHITE, 1);
+        var jGReq2 = new JoinGameRequest(logRes2.authToken(), ChessGame.TeamColor.WHITE, 1);
+        gameService.joinGame(jGReq1);
+        assertThrows(AlreadyTakenException.class, () -> {gameService.joinGame(jGReq2);});
+    }
 
+    @Test
+    void ListGamesPositiveTest() throws UnauthorizedException {
+
+    }
 }

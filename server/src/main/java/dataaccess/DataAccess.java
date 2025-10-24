@@ -4,6 +4,8 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 
+import java.util.List;
+
 public interface DataAccess {
     void clear();
     void createUser(UserData user);
@@ -11,7 +13,8 @@ public interface DataAccess {
     void createAuth(AuthData authData);
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
-    GameData listGames(String authToken);
+    List<GameData> listGames(String authToken);
     GameData createGame(String gameName, int gameID);
     GameData getGame(int gameID);
+    void updateGame(GameData gameData);
 }
