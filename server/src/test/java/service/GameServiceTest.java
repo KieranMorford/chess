@@ -15,10 +15,6 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
-    @AfterAll
-    static void tearDown() {
-
-    }
 
     @Test
     void newGamePositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
