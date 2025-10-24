@@ -1,4 +1,4 @@
-package Service;
+package service;
 
 import Exceptions.AlreadyTakenException;
 import Exceptions.BadRequestException;
@@ -7,11 +7,8 @@ import RequestResult.LoginRequest;
 import RequestResult.LogoutRequest;
 import RequestResult.NewGameRequest;
 import RequestResult.RegisterRequest;
-import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
-import service.GameService;
-import service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
