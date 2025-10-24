@@ -52,6 +52,8 @@ public class GameService {
         }
         if (jGReq.playerColor().equals(ChessGame.TeamColor.WHITE) && dataAccess.getGame(jGReq.gameID()).whiteUsername() != null) {
             throw new AlreadyTakenException("White Already Taken");
+        } else if (jGReq.playerColor().equals(ChessGame.TeamColor.BLACK) && dataAccess.getGame(jGReq.gameID()).blackUsername() != null) {
+            throw new AlreadyTakenException("White Already Taken");
         }
         var oldGame = dataAccess.getGame(jGReq.gameID());
         var newGame = new GameData(oldGame.gameID(), oldGame.whiteUsername(), oldGame.blackUsername(), oldGame.gameName(), oldGame.game());

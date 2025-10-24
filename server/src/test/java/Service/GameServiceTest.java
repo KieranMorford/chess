@@ -131,7 +131,35 @@ class GameServiceTest {
     }
 
     @Test
-    void ListGamesPositiveTest() throws UnauthorizedException {
+    void ListGamesPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq1 = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
+        NewGameRequest nGReq2 = new NewGameRequest(logRes.authToken(), "Second Strand-type Game");
+        NewGameRequest nGReq3 = new NewGameRequest(logRes.authToken(), "First Woman-With-a-Sword-type Game");
+        gameService.newGame(nGReq1);
+        gameService.newGame(nGReq2);
+        gameService.newGame(nGReq3);
+        var listTest = gameService.getGameList(logRes.authToken());
+        assertEquals(3, listTest.games().size());
+    }
 
+    @Test
+    void ListGamesUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq1 = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
+        gameService.newGame(nGReq1);
+        assertThrows(UnauthorizedException.class, () -> {gameService.getGameList("BadAuthToken");});
     }
 }

@@ -118,8 +118,8 @@ public class Server {
         var serializer = new Gson();
         try {
             String authToken = ctx.header("authorization");
-            String reqJson = ctx.body();
-            var nGReq = new NewGameRequest(authToken, reqJson);
+            var reqJson = serializer.fromJson(ctx.body(), NewGameRequest.class);
+            var nGReq = new NewGameRequest(authToken, reqJson.gameName());
 
             var newGameResult = gameService.newGame(nGReq);
 

@@ -5,10 +5,12 @@ import Exceptions.BadRequestException;
 import Exceptions.UnauthorizedException;
 import RequestResult.LoginRequest;
 import RequestResult.LogoutRequest;
+import RequestResult.NewGameRequest;
 import RequestResult.RegisterRequest;
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
+import service.GameService;
 import service.UserService;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,12 +88,26 @@ class UserServiceTest {
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
         userService.register(regReq);
-        new LoginRequest("link","kronos");
         LogoutRequest logoReq = new LogoutRequest("notAuthToken");
         assertThrows(UnauthorizedException.class, () -> {userService.logout(logoReq);});
     }
 
     @Test
-    void clear() {
+    void clear() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+        RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
+        var mDA = new MemoryDataAccess();
+        UserService userService = new UserService(mDA);
+        GameService gameService = new GameService(mDA);
+        userService.register(regReq);
+        LoginRequest logReq = new LoginRequest("link","kronos");
+        var logRes = userService.login(logReq);
+        NewGameRequest nGReq1 = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
+        NewGameRequest nGReq2 = new NewGameRequest(logRes.authToken(), "Second Strand-type Game");
+        NewGameRequest nGReq3 = new NewGameRequest(logRes.authToken(), "First Woman-With-a-Sword-type Game");
+        gameService.newGame(nGReq1);
+        gameService.newGame(nGReq2);
+        gameService.newGame(nGReq3);
+        userService.clear();
+        assertThrows(UnauthorizedException.class, () -> {gameService.getGameList(logRes.authToken()).games().size();});
     }
 }
