@@ -57,9 +57,11 @@ public class GameService {
         var oldGame = dataAccess.getGame(jGReq.gameID());
         var newGame = new GameData(oldGame.gameID(), oldGame.whiteUsername(), oldGame.blackUsername(), oldGame.gameName(), oldGame.game());
         if(jGReq.playerColor().equals(ChessGame.TeamColor.WHITE)) {
-            newGame = new GameData(oldGame.gameID(), dataAccess.getAuth(jGReq.authToken()).username(), oldGame.blackUsername(), oldGame.gameName(), oldGame.game());
+            newGame = new GameData(oldGame.gameID(),
+                    dataAccess.getAuth(jGReq.authToken()).username(), oldGame.blackUsername(), oldGame.gameName(), oldGame.game());
         } else if(jGReq.playerColor().equals(ChessGame.TeamColor.BLACK)) {
-            newGame = new GameData(oldGame.gameID(),oldGame.whiteUsername(), dataAccess.getAuth(jGReq.authToken()).username(), oldGame.gameName(), oldGame.game());
+            newGame = new GameData(oldGame.gameID(),oldGame.whiteUsername(),
+                    dataAccess.getAuth(jGReq.authToken()).username(), oldGame.gameName(), oldGame.game());
         }
         dataAccess.updateGame(newGame);
 
