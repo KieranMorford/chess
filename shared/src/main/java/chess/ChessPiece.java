@@ -328,12 +328,12 @@ public class ChessPiece {
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() + 1, myPos.getColumn()), PieceType.ROOK));
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() + 1, myPos.getColumn()), PieceType.QUEEN));
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() + 1, myPos.getColumn()), PieceType.KNIGHT));
-                    } else {
+                    } else if (board.getPiece(new ChessPosition(myPos.getRow() + 2, myPos.getColumn())) == null
+                            && myPos.getRow() == 2) {
+                        moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() + 2, myPos.getColumn()), null));
+                    }
+                    if (myPos.getRow() + 1 != 8) {
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() + 1, myPos.getColumn()), null));
-                        if (board.getPiece(new ChessPosition(myPos.getRow() + 2, myPos.getColumn())) == null
-                                && myPos.getRow() == 2) {
-                            moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() + 2, myPos.getColumn()), null));
-                        }
                     }
                 }
                 if (myPos.getRow() + 1 <= 8 && myPos.getColumn() + 1 <= 8
@@ -368,12 +368,12 @@ public class ChessPiece {
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() - 1, myPos.getColumn()), PieceType.ROOK));
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() - 1, myPos.getColumn()), PieceType.QUEEN));
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() - 1, myPos.getColumn()), PieceType.KNIGHT));
-                    } else {
+                    } else if (board.getPiece(new ChessPosition(myPos.getRow() - 2, myPos.getColumn())) == null
+                            && myPos.getRow() == 7) {
+                        moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() - 2, myPos.getColumn()), null));
+                    }
+                    if (myPos.getRow() - 1 != 1) {
                         moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() - 1, myPos.getColumn()), null));
-                        if (board.getPiece(new ChessPosition(myPos.getRow() - 2, myPos.getColumn())) == null
-                                && myPos.getRow() == 7) {
-                            moves.add(new ChessMove(myPos, new ChessPosition(myPos.getRow() - 2, myPos.getColumn()), null));
-                        }
                     }
                 }
                 if (myPos.getRow() - 1 > 0 && myPos.getColumn() + 1 <= 8
