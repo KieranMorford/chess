@@ -146,13 +146,8 @@ public class ChessGame {
         if (teamColor == TeamColor.WHITE) {
             color = TeamColor.BLACK;
         }
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition tempPosition = new ChessPosition(i, j);
-                if (!checkForCheck(kingPosition, tempPosition, color)) {
-                    return true;
-                }
-            }
+        if (checkBoard(kingPosition, color, true)) {
+            return true;
         }
         return false;
     }
@@ -169,24 +164,13 @@ public class ChessGame {
         if (teamColor == TeamColor.WHITE) {
             color = TeamColor.BLACK;
         }
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition tempPosition = new ChessPosition(i, j);
-                if (!anyMoves(tempPosition, teamColor)) {
-                    return false;
-                }
-            }
+        if (!checkAnyMoves(teamColor)) {
+            return false;
         }
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition tempPosition = new ChessPosition(i, j);
-                if (!checkForCheck(kingPosition, tempPosition, color)) {
-                    return true;
-                }
-            }
+        if (checkBoard(kingPosition, color, true)) {
+            return true;
         }
         return false;
-
     }
 
     /**
@@ -202,21 +186,11 @@ public class ChessGame {
         if (teamColor == TeamColor.WHITE) {
             color = TeamColor.BLACK;
         }
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition tempPosition = new ChessPosition(i, j);
-                if (!anyMoves(tempPosition, teamColor)) {
-                    return false;
-                }
-            }
+        if (!checkAnyMoves(teamColor)) {
+            return false;
         }
-        for (int i = 1; i <= 8; i++) {
-            for (int j = 1; j <= 8; j++) {
-                ChessPosition tempPosition = new ChessPosition(i, j);
-                if (!checkForCheck(kingPosition, tempPosition, color)) {
-                    return false;
-                }
-            }
+        if (!checkBoard(kingPosition, color, false)) {
+            return false;
         }
         return true;
     }
@@ -227,6 +201,18 @@ public class ChessGame {
             if (tempPiece.getTeamColor() == teamColor) {
                 Collection<ChessMove> moves = validMoves(tempPosition);
                 if (!moves.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean checkAnyMoves(TeamColor teamColor) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if (!anyMoves(tempPosition, teamColor)) {
                     return false;
                 }
             }
@@ -247,6 +233,18 @@ public class ChessGame {
             }
         }
         return true;
+    }
+
+    private boolean checkBoard(ChessPosition kingPosition, TeamColor color, boolean response) {
+        for (int i = 1; i <= 8; i++) {
+            for (int j = 1; j <= 8; j++) {
+                ChessPosition tempPosition = new ChessPosition(i, j);
+                if (!checkForCheck(kingPosition, tempPosition, color)) {
+                    return response;
+                }
+            }
+        }
+        return !response;
     }
 
     /**
