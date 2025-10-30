@@ -49,13 +49,9 @@ public class Server {
 
             ctx.result(serializer.toJson(registerResult));
         } catch (BadRequestException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(400).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 400);
         } catch (AlreadyTakenException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(403).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 403);
         }
     }
 
@@ -69,13 +65,9 @@ public class Server {
 
             ctx.result(serializer.toJson(loginResult));
         } catch (BadRequestException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(400).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(401).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 401);
         }
     }
 
@@ -89,9 +81,7 @@ public class Server {
 
             ctx.result(serializer.toJson(null));
         } catch (UnauthorizedException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(401).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 401);
         }
     }
 
@@ -104,9 +94,7 @@ public class Server {
 
             ctx.result(serializer.toJson(gGLRes));
         } catch (UnauthorizedException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(401).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 401);
         }
     }
 
@@ -121,13 +109,9 @@ public class Server {
 
             ctx.result(serializer.toJson(newGameResult));
         } catch (BadRequestException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(400).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(401).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 401);
         }
     }
 
@@ -151,18 +135,18 @@ public class Server {
 
             ctx.result(serializer.toJson(null));
         } catch (BadRequestException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(400).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(401).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 401);
         } catch (AlreadyTakenException ex) {
-            Map<String, String> exJson = new HashMap<>();
-            exJson.put("message", "Error: " + ex.getMessage());
-            ctx.status(403).result(serializer.toJson(exJson));
+            reportError(serializer, ctx, ex, 403);
         }
+    }
+
+    private void reportError(Gson serializer, Context ctx, Exception ex, int statusCode) {
+        Map<String, String> exJson = new HashMap<>();
+        exJson.put("message", "Error: " + ex.getMessage());
+        ctx.status(statusCode).result(serializer.toJson(exJson));
     }
 
     private void delete(Context ctx) {
