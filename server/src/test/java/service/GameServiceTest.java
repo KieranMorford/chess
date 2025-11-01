@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class GameServiceTest {
 
     @Test
-    void newGamePositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void newGamePositiveTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -33,7 +34,7 @@ class GameServiceTest {
     }
 
     @Test
-    void newGameBadRequestTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void newGameBadRequestTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -48,7 +49,7 @@ class GameServiceTest {
     }
 
     @Test
-    void newGameUnauthorizedTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void newGameUnauthorizedTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -61,7 +62,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGamePositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void joinGamePositive() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -77,7 +78,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameBadRequestTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void joinGameBadRequestTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -94,7 +95,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameUnauthorizedTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void joinGameUnauthorizedTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -109,7 +110,7 @@ class GameServiceTest {
     }
 
     @Test
-    void joinGameAlreadyTakenTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException {
+    void joinGameAlreadyTakenTest() throws BadRequestException, AlreadyTakenException, UnauthorizedException, DataAccessException {
         RegisterRequest regReq1 = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         RegisterRequest regReq2 = new RegisterRequest("zelda","flash","hrmorford@gmail.com");
         var mDA = new MemoryDataAccess();
@@ -130,7 +131,7 @@ class GameServiceTest {
     }
 
     @Test
-    void listGamesPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+    void listGamesPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);
@@ -149,7 +150,7 @@ class GameServiceTest {
     }
 
     @Test
-    void listGamesUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException {
+    void listGamesUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         var mDA = new MemoryDataAccess();
         UserService userService = new UserService(mDA);

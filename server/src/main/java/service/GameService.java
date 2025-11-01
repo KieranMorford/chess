@@ -1,5 +1,6 @@
 package service;
 
+import dataaccess.DataAccessException;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
@@ -21,7 +22,7 @@ public class GameService {
         this.dataAccess = dataAccess;
     }
 
-    public GetGameListResult getGameList(String authToken) throws UnauthorizedException {
+    public GetGameListResult getGameList(String authToken) throws UnauthorizedException, DataAccessException {
         if (authToken == null || dataAccess.getAuth(authToken) == null) {
             throw new UnauthorizedException("Unauthorized");
         }
@@ -30,7 +31,7 @@ public class GameService {
         return gLRes;
     }
 
-    public NewGameResult newGame(NewGameRequest nGReq) throws UnauthorizedException, BadRequestException {
+    public NewGameResult newGame(NewGameRequest nGReq) throws UnauthorizedException, BadRequestException, DataAccessException {
         if (nGReq.authToken() == null || nGReq.gameName() == null || nGReq.gameName().equals("{}")) {
             throw new BadRequestException("Bad Request");
         }
@@ -42,7 +43,7 @@ public class GameService {
         return nGRes;
     }
 
-    public void joinGame(JoinGameRequest jGReq) throws UnauthorizedException, BadRequestException, AlreadyTakenException {
+    public void joinGame(JoinGameRequest jGReq) throws UnauthorizedException, BadRequestException, AlreadyTakenException, DataAccessException {
         if (jGReq.authToken() == null || jGReq.playerColor() == null || jGReq.gameID() == 0 || dataAccess.getGame(jGReq.gameID()) == null) {
             throw new BadRequestException("Bad Request");
         }

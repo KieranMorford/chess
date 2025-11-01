@@ -1,8 +1,10 @@
 package service;
 
+import dataaccess.DataAccessException;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
+import org.mindrot.jbcrypt.BCrypt;
 import requestresult.*;
 import dataaccess.DataAccess;
 import model.AuthData;
@@ -17,7 +19,7 @@ public class UserService {
         this.dataAccess = dataAccess;
     }
 
-    public RegisterResult register(RegisterRequest regReq) throws AlreadyTakenException, BadRequestException {
+    public RegisterResult register(RegisterRequest regReq) throws AlreadyTakenException, BadRequestException, DataAccessException {
         if (dataAccess.getUser(regReq.username()) != null) {
             throw new AlreadyTakenException("Username Already Taken");
         }
@@ -32,11 +34,11 @@ public class UserService {
         return regRes;
     }
 
-    public LoginResult login(LoginRequest logReq) throws UnauthorizedException, BadRequestException {
+    public LoginResult login(LoginRequest logReq) throws UnauthorizedException, BadRequestException, DataAccessException {
         if (logReq.username() == null || logReq.password() == null) {
             throw new BadRequestException("Bad Request");
         }
-        if (dataAccess.getUser(logReq.username()) == null || !dataAccess.getUser(logReq.username()).password().equals(logReq.password())) {
+        if (dataAccess.getUser(logReq.username()) == null || !(BCrypt.checkpw(logReq.password(), dataAccess.getUser(logReq.username()).password()))) {
             throw new UnauthorizedException("Unauthorized");
         }
         var authToken = generateAuthToken();
@@ -46,14 +48,14 @@ public class UserService {
         return logRes;
     }
 
-    public void logout(LogoutRequest logoReq) throws UnauthorizedException {
+    public void logout(LogoutRequest logoReq) throws UnauthorizedException, DataAccessException {
         if (logoReq == null || dataAccess.getAuth(logoReq.authToken()) == null) {
             throw new UnauthorizedException("Unauthorized");
         }
         dataAccess.deleteAuth(logoReq.authToken());
     }
 
-    public void clear() {
+    public void clear() throws DataAccessException {
         dataAccess.clear();
     }
 

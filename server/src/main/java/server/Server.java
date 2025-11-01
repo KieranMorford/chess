@@ -1,5 +1,7 @@
 package server;
 
+import dataaccess.DataAccessException;
+import dataaccess.SQLDataAccess;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
@@ -12,6 +14,7 @@ import io.javalin.http.Context;
 import service.GameService;
 import service.UserService;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,11 +22,14 @@ public class Server {
 
     private final Javalin javalin;
     private final MemoryDataAccess memoryDataAccess;
-    private final UserService userService;
-    private final GameService gameService;
+    private final SQLDataAccess sqlDataAccess;
+    private final UserService userServiceM;
+    private final UserService userServiceSQL;
+    private final GameService gameServiceM;
+    private final GameService gameServiceSQL;
 
 
-    public Server() {
+    public Server() throws DataAccessException {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
@@ -33,8 +39,11 @@ public class Server {
                 .put("/game", this::joinGame)
                 .delete("/db", this::delete);
         memoryDataAccess = new MemoryDataAccess();
-        userService = new UserService(memoryDataAccess);
-        gameService = new GameService(memoryDataAccess);
+        sqlDataAccess = new SQLDataAccess();
+        userServiceM = new UserService(memoryDataAccess);
+        userServiceSQL = new UserService(sqlDataAccess);
+        gameServiceM = new GameService(memoryDataAccess);
+        gameServiceSQL = new GameService(sqlDataAccess);
         // Register your endpoints and exception handlers here.
 
     }
@@ -45,13 +54,15 @@ public class Server {
             String reqJson = ctx.body();
             var regReq = serializer.fromJson(reqJson, RegisterRequest.class);
 
-            var registerResult = userService.register(regReq);
+            var registerResult = userServiceSQL.register(regReq);
 
             ctx.result(serializer.toJson(registerResult));
         } catch (BadRequestException ex) {
             reportError(serializer, ctx, ex, 400);
         } catch (AlreadyTakenException ex) {
             reportError(serializer, ctx, ex, 403);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
         }
     }
 
@@ -61,13 +72,15 @@ public class Server {
             String reqJson = ctx.body();
             var logReq = serializer.fromJson(reqJson, LoginRequest.class);
 
-            var loginResult = userService.login(logReq);
+            var loginResult = userServiceSQL.login(logReq);
 
             ctx.result(serializer.toJson(loginResult));
         } catch (BadRequestException ex) {
             reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
+        } catch (DataAccessException e) {
+            reportError(serializer, ctx, e, 500);
         }
     }
 
@@ -77,11 +90,13 @@ public class Server {
             String reqJson = ctx.header("authorization");
             var logoReq = new LogoutRequest(reqJson);
 
-            userService.logout(logoReq);
+            userServiceSQL.logout(logoReq);
 
             ctx.result(serializer.toJson(null));
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -90,11 +105,13 @@ public class Server {
         try {
             String authToken = ctx.header("authorization");
 
-            var gGLRes = gameService.getGameList(authToken);
+            var gGLRes = gameServiceSQL.getGameList(authToken);
 
             ctx.result(serializer.toJson(gGLRes));
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -105,13 +122,15 @@ public class Server {
             var reqJson = serializer.fromJson(ctx.body(), NewGameRequest.class);
             var nGReq = new NewGameRequest(authToken, reqJson.gameName());
 
-            var newGameResult = gameService.newGame(nGReq);
+            var newGameResult = gameServiceSQL.newGame(nGReq);
 
             ctx.result(serializer.toJson(newGameResult));
         } catch (BadRequestException ex) {
             reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
+        } catch (DataAccessException e) {
+            reportError(serializer, ctx, e, 500);
         }
     }
 
@@ -131,7 +150,7 @@ public class Server {
                 jGReq = new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, Integer.parseInt(preJGReq.gameID()));
             }
 
-            gameService.joinGame(jGReq);
+            gameServiceSQL.joinGame(jGReq);
 
             ctx.result(serializer.toJson(null));
         } catch (BadRequestException ex) {
@@ -140,6 +159,8 @@ public class Server {
             reportError(serializer, ctx, ex, 401);
         } catch (AlreadyTakenException ex) {
             reportError(serializer, ctx, ex, 403);
+        } catch (DataAccessException e) {
+            reportError(serializer, ctx, e, 500);
         }
     }
 
@@ -149,8 +170,8 @@ public class Server {
         ctx.status(statusCode).result(serializer.toJson(exJson));
     }
 
-    private void delete(Context ctx) {
-        userService.clear();
+    private void delete(Context ctx) throws DataAccessException {
+        userServiceSQL.clear();
     }
 
     public int run(int desiredPort) {
