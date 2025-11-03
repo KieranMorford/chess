@@ -101,13 +101,18 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void deleteAuth(String authToken) throws DataAccessException {
+    public void deleteAuth(String authToken) throws DataAccessException, UnauthorizedException {
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement("DELETE FROM AuthData WHERE authToken = ?;");
             preparedStatement.setString(1, authToken);
-            preparedStatement.executeQuery();
+            int rowsAffected = preparedStatement.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new UnauthorizedException("Token not found");
+            }
         } catch (SQLException | DataAccessException ex) {
             throw new DataAccessException("failed to get auth", ex);
+        } catch (UnauthorizedException ex) {
+            throw new UnauthorizedException("Bad AuthToken");
         }
     }
 

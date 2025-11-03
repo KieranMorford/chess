@@ -83,23 +83,45 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void getAuthPositive() {
+    void getAuthPositive() throws DataAccessException, UnauthorizedException {
+        var DA = new SQLDataAccess();
+        var auth = new AuthData("link", "Token");
+        DA.clear();
+        DA.createAuth(auth);
+        assertEquals("link", DA.getAuth("Token").username());
     }
 
     @Test
-    void getAuthNegative() {
+    void getAuthNegative() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        var auth = new AuthData("link", "Token");
+        DA.clear();
+        DA.createAuth(auth);
+        assertThrows(UnauthorizedException.class, () -> {DA.getAuth(null);});
     }
 
     @Test
-    void deleteAuthPositive() {
+    void deleteAuthPositive() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        var auth = new AuthData("link", "Token");
+        DA.clear();
+        DA.createAuth(auth);
+        assertDoesNotThrow(() -> {DA.deleteAuth("Token");});
     }
 
     @Test
-    void deleteAuthNegative() {
+    void deleteAuthNegative() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        var auth = new AuthData("link", "Token");
+        DA.clear();
+        DA.createAuth(auth);
+        assertDoesNotThrow(() -> {DA.deleteAuth("Token");});
+        assertThrows(UnauthorizedException.class, () -> {DA.deleteAuth("Token");});
     }
 
     @Test
     void listGamesPositive() {
+
     }
 
     @Test
