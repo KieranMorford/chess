@@ -66,14 +66,21 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void createAuth(AuthData authData) {
-
+    public void createAuth(AuthData authData) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("INSERT INTO AuthData (authToken, username) VALUES (?,?);");
+            preparedStatement.setString(1, authData.authToken());
+            preparedStatement.setString(2, authData.username());
+            preparedStatement.executeUpdate();
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("failed to add user", ex);
+        }
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException, UnauthorizedException {
         try (var conn = DatabaseManager.getConnection()) {
-            var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM UserData WHERE authToken = ?;");
+            var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM AuthData WHERE authToken = ?;");
             preparedStatement.setString(1, authToken);
             var authSet = preparedStatement.executeQuery();
             if (authSet.next()) {
