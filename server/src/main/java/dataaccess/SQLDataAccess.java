@@ -9,6 +9,8 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.SQLException;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class SQLDataAccess implements DataAccess {
     public SQLDataAccess() throws DataAccessException {
         DatabaseManager.createDatabase();
@@ -52,6 +54,9 @@ public class SQLDataAccess implements DataAccess {
 
     @Override
     public UserData getUser(String username) throws DataAccessException {
+        if (username == null) {
+            throw new DataAccessException("username is null");
+        }
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM UserData WHERE username = ?;");
             preparedStatement.setString(1, username);
@@ -84,7 +89,7 @@ public class SQLDataAccess implements DataAccess {
             preparedStatement.setString(1, authToken);
             var authSet = preparedStatement.executeQuery();
             if (authSet.next()) {
-                return new AuthData(authSet.getString("authToken"), authSet.getString("username"));
+                return new AuthData(authSet.getString("username"), authSet.getString("authToken"));
             } else  {
                 throw new UnauthorizedException("Unauthorized");
             }

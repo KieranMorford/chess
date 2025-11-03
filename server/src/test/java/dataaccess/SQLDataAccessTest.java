@@ -1,6 +1,8 @@
 package dataaccess;
 
 import exceptions.BadRequestException;
+import exceptions.UnauthorizedException;
+import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -56,15 +58,28 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void getUserNegative() {
+    void getUserNegative() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        DA.clear();
+        assertThrows(DataAccessException.class, () -> {DA.getUser(null);});
     }
 
     @Test
-    void createAuthPositive() {
+    void createAuthPositive() throws DataAccessException, UnauthorizedException {
+        var DA = new SQLDataAccess();
+        var auth = new AuthData("link", "Token");
+        DA.clear();
+        DA.createAuth(auth);
+        assertEquals("link", DA.getAuth("Token").username());
     }
 
     @Test
-    void createAuthNegative() {
+    void createAuthNegative() throws DataAccessException, UnauthorizedException {
+        var DA = new SQLDataAccess();
+        var auth = new AuthData("link", "Token");
+        DA.clear();
+        DA.createAuth(auth);
+        assertThrows(UnauthorizedException.class, () -> {DA.getAuth("BadToken");});
     }
 
     @Test
