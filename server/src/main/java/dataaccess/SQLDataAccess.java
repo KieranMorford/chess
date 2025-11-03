@@ -45,7 +45,7 @@ public class SQLDataAccess implements DataAccess {
             preparedStatement.setString(2, hashedPassword);
             preparedStatement.setString(3, user.email());
             preparedStatement.executeUpdate();
-        } catch (SQLException | DataAccessException ex) {
+        } catch (SQLException ex) {
             throw new DataAccessException("failed to add user", ex);
         }
     }
@@ -96,8 +96,14 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void deleteAuth(String authToken) {
-
+    public void deleteAuth(String authToken) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("DELETE FROM AuthData WHERE authToken = ?;");
+            preparedStatement.setString(1, authToken);
+            preparedStatement.executeQuery();
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("failed to get auth", ex);
+        }
     }
 
     @Override

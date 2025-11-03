@@ -1,6 +1,11 @@
 package dataaccess;
 
+import model.UserData;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import service.UserService;
+
+import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -11,7 +16,23 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void createUserPositive() {
+    void createUserPositive() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        var user = new UserData("link", "kronos", "kcmorford@gmail.com");
+        UserData userR = null;
+        DA.clear();
+        DA.createUser(user);
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM UserData WHERE username = ?;");
+            preparedStatement.setString(1, user.username());
+            var userSet = preparedStatement.executeQuery();
+            if (userSet.next()) {
+                userR = new UserData(userSet.getString("username"), userSet.getString("password"), userSet.getString("email"));
+            }
+            Assertions.assertEquals(user.username(), userR.username());
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("failed to get user", ex);
+        }
     }
 
     @Test
