@@ -29,7 +29,7 @@ public class Server {
     private final GameService gameServiceSQL;
 
 
-    public Server() throws DataAccessException {
+    public Server() {
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
@@ -39,7 +39,11 @@ public class Server {
                 .put("/game", this::joinGame)
                 .delete("/db", this::delete);
         memoryDataAccess = new MemoryDataAccess();
-        sqlDataAccess = new SQLDataAccess();
+        try {
+            sqlDataAccess = new SQLDataAccess();
+        } catch (DataAccessException ex) {
+            throw new RuntimeException(ex);
+        }
         userServiceM = new UserService(memoryDataAccess);
         userServiceSQL = new UserService(sqlDataAccess);
         gameServiceM = new GameService(memoryDataAccess);
