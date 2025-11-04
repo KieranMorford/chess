@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
 
-    private SQLDataAccess DA = new SQLDataAccess();
+    private final SQLDataAccess DA = new SQLDataAccess();
 
     UserServiceTest() throws DataAccessException {
     }

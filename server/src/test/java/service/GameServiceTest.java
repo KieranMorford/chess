@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
 
-     private SQLDataAccess DA = new SQLDataAccess();
+     private final SQLDataAccess DA = new SQLDataAccess();
 
     GameServiceTest() throws DataAccessException {
     }

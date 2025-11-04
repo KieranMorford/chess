@@ -52,8 +52,7 @@ public class MemoryDataAccess implements DataAccess {
     @Override
     public List<GameData> listGames(String authToken) {
         if (userAuth.containsKey(authToken)) {
-            List<GameData> gamesList = new ArrayList<>(games.values());
-            return gamesList;
+            return new ArrayList<>(games.values());
         }
         return null;
     }

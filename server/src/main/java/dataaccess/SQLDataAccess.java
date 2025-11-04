@@ -169,8 +169,24 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGame(GameData gameData) {
-
+    public void updateGame(GameData gameData) throws DataAccessException {
+        var serializer = new Gson();
+        String gameJson = serializer.toJson(gameData.game());
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement1 = conn.prepareStatement("DELETE FROM GameData WHERE gameID = ?;");
+            preparedStatement1.setInt(1, gameData.gameID());
+            preparedStatement1.executeUpdate();
+            var preparedStatement2 = conn.prepareStatement(
+                    "INSERT INTO GameData (gameID, whiteUsername, blackUsername, gameName, game) VALUES (?,?,?,?,?);");
+            preparedStatement2.setString(1, Integer.toString(gameData.gameID()));
+            preparedStatement2.setString(2, gameData.whiteUsername());
+            preparedStatement2.setString(3, gameData.blackUsername());
+            preparedStatement2.setString(4, gameData.gameName());
+            preparedStatement2.setString(5, gameJson);
+            preparedStatement2.executeUpdate();
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("failed to update game", ex);
+        }
     }
 
     private final String[] createStatements = {
