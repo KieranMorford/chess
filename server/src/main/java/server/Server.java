@@ -79,8 +79,8 @@ public class Server {
             reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
-        } catch (DataAccessException e) {
-            reportError(serializer, ctx, e, 500);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
         }
     }
 
@@ -95,8 +95,8 @@ public class Server {
             ctx.result(serializer.toJson(null));
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
         }
     }
 
@@ -110,8 +110,8 @@ public class Server {
             ctx.result(serializer.toJson(gGLRes));
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
-        } catch (DataAccessException e) {
-            throw new RuntimeException(e);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
         }
     }
 
@@ -129,8 +129,8 @@ public class Server {
             reportError(serializer, ctx, ex, 400);
         } catch (UnauthorizedException ex) {
             reportError(serializer, ctx, ex, 401);
-        } catch (DataAccessException e) {
-            reportError(serializer, ctx, e, 500);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
         }
     }
 
@@ -159,8 +159,8 @@ public class Server {
             reportError(serializer, ctx, ex, 401);
         } catch (AlreadyTakenException ex) {
             reportError(serializer, ctx, ex, 403);
-        } catch (DataAccessException e) {
-            reportError(serializer, ctx, e, 500);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
         }
     }
 
@@ -171,7 +171,12 @@ public class Server {
     }
 
     private void delete(Context ctx) throws DataAccessException {
-        userServiceSQL.clear();
+        var serializer = new Gson();
+        try {
+            userServiceSQL.clear();
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
+        }
     }
 
     public int run(int desiredPort) {
