@@ -21,31 +21,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SQLDataAccessTest {
 
-    private SQLDataAccess DA = new SQLDataAccess();
+    private SQLDataAccess dA = new SQLDataAccess();
 
     SQLDataAccessTest() throws DataAccessException {
     }
 
     @Test
     void clear() throws DataAccessException {
-        DA.clear();
+        dA.clear();
         var user = new UserData("link", "kronos", "kcmorford@gmail.com");
-        DA.createUser(user);
+        dA.createUser(user);
         var auth = new AuthData("link", "Token");
-        DA.createAuth(auth);
-        DA.createGame("First Strand-type Game", 123);
-        DA.clear();
-        assertNull(DA.getUser("link"));
-        assertThrows(UnauthorizedException.class, () -> {DA.getAuth("Token");});
-        assertThrows(BadRequestException.class, () -> {DA.getGame(123);});
+        dA.createAuth(auth);
+        dA.createGame("First Strand-type Game", 123);
+        dA.clear();
+        assertNull(dA.getUser("link"));
+        assertThrows(UnauthorizedException.class, () -> {dA.getAuth("Token");});
+        assertThrows(BadRequestException.class, () -> {dA.getGame(123);});
     }
 
     @Test
     void createUserPositive() throws DataAccessException {
         var user = new UserData("link", "kronos", "kcmorford@gmail.com");
         UserData userR = null;
-        DA.clear();
-        DA.createUser(user);
+        dA.clear();
+        dA.createUser(user);
         try (var conn = DatabaseManager.getConnection()) {
             var preparedStatement = conn.prepareStatement("SELECT username, password, email FROM UserData WHERE username = ?;");
             preparedStatement.setString(1, user.username());
@@ -62,131 +62,135 @@ class SQLDataAccessTest {
     @Test
     void createUserNegative() throws DataAccessException {
         var user = new UserData(null, "kronos", "kcmorford@gmail.com");
-        DA.clear();
-        assertThrows(DataAccessException.class, () -> {DA.createUser(user);});
+        dA.clear();
+        assertThrows(DataAccessException.class, () -> {dA.createUser(user);});
     }
 
     @Test
     void getUserPositive() throws DataAccessException {
         var user = new UserData("link", "kronos", "kcmorford@gmail.com");
-        DA.clear();
-        DA.createUser(user);
-        UserData userR = DA.getUser(user.username());
+        dA.clear();
+        dA.createUser(user);
+        UserData userR = dA.getUser(user.username());
         assertEquals("link", userR.username());
     }
 
     @Test
     void getUserNegative() throws DataAccessException {
-        DA.clear();
-        assertThrows(DataAccessException.class, () -> {DA.getUser(null);});
+        dA.clear();
+        assertThrows(DataAccessException.class, () -> {dA.getUser(null);});
     }
 
     @Test
     void createAuthPositive() throws DataAccessException, UnauthorizedException {
         var auth = new AuthData("link", "Token");
-        DA.clear();
-        DA.createAuth(auth);
-        assertEquals("link", DA.getAuth("Token").username());
+        dA.clear();
+        dA.createAuth(auth);
+        assertEquals("link", dA.getAuth("Token").username());
     }
 
     @Test
     void createAuthNegative() throws DataAccessException {
         var auth = new AuthData("link", "Token");
-        DA.clear();
-        DA.createAuth(auth);
-        assertThrows(UnauthorizedException.class, () -> {DA.getAuth("BadToken");});
+        dA.clear();
+        dA.createAuth(auth);
+        assertThrows(UnauthorizedException.class, () -> {dA.getAuth("BadToken");});
     }
 
     @Test
     void getAuthPositive() throws DataAccessException, UnauthorizedException {
-        var auth = new AuthData("link", "Token");
-        DA.clear();
-        DA.createAuth(auth);
-        assertEquals("link", DA.getAuth("Token").username());
+        var auth1 = new AuthData("link", "Token");
+        var auth2 = new AuthData("zelda", "shinyToken");
+        dA.clear();
+        dA.createAuth(auth1);
+        dA.createAuth(auth2);
+        assertEquals("link", dA.getAuth("Token").username());
+        assertEquals("zelda", dA.getAuth("shinyToken").username());
     }
 
     @Test
     void getAuthNegative() throws DataAccessException {
         var auth = new AuthData("link", "Token");
-        DA.clear();
-        DA.createAuth(auth);
-        assertThrows(UnauthorizedException.class, () -> {DA.getAuth(null);});
+        dA.clear();
+        dA.createAuth(auth);
+        assertThrows(UnauthorizedException.class, () -> {dA.getAuth(null);});
     }
 
     @Test
     void deleteAuthPositive() throws DataAccessException {
         var auth = new AuthData("link", "Token");
-        DA.clear();
-        DA.createAuth(auth);
-        assertDoesNotThrow(() -> {DA.deleteAuth("Token");});
+        dA.clear();
+        dA.createAuth(auth);
+        assertDoesNotThrow(() -> {dA.deleteAuth("Token");});
     }
 
     @Test
     void deleteAuthNegative() throws DataAccessException {
         var auth = new AuthData("link", "Token");
-        DA.clear();
-        DA.createAuth(auth);
-        assertDoesNotThrow(() -> {DA.deleteAuth("Token");});
-        assertThrows(UnauthorizedException.class, () -> {DA.deleteAuth("Token");});
+        dA.clear();
+        dA.createAuth(auth);
+        assertDoesNotThrow(() -> {dA.deleteAuth("Token");});
+        assertThrows(UnauthorizedException.class, () -> {dA.deleteAuth("Token");});
     }
 
     @Test
     void listGamesPositive() throws DataAccessException, UnauthorizedException {
         var user = new AuthData("link", "token");
-        DA.clear();
-        DA.createAuth(user);
-        DA.createGame("First Strand-type Game", 123);
-        DA.createGame("Second Strand-type Game", 456);
-        DA.createGame("First Woman-With-a-Sword-type Game", 789);
-        var list = DA.listGames(user.authToken());
+        dA.clear();
+        dA.createAuth(user);
+        dA.createGame("First Strand-type Game", 123);
+        dA.createGame("Second Strand-type Game", 456);
+        dA.createGame("First Woman-With-a-Sword-type Game", 789);
+        var list = dA.listGames(user.authToken());
         assertEquals(3, list.size());
     }
 
     @Test
     void listGamesNegative() throws DataAccessException {
-        DA.clear();
-        assertThrows(UnauthorizedException.class, () -> {DA.listGames("Token");});
+        dA.clear();
+        assertThrows(UnauthorizedException.class, () -> {dA.listGames("Token");});
     }
 
     @Test
     void createGamePositive() throws DataAccessException {
-        DA.clear();
-        assertDoesNotThrow(() -> {DA.createGame("First Strand-type Game", 123);});
+        dA.clear();
+        assertDoesNotThrow(() -> {dA.createGame("First Strand-type Game", 123);});
     }
 
     @Test
     void createGameNegative() throws DataAccessException {
-        DA.clear();
-        DA.createGame("First Strand-type Game", 123);
-        assertThrows(DataAccessException.class, () -> {DA.createGame("First Strand-type Game", 123);});
+        dA.clear();
+        dA.createGame("First Strand-type Game", 123);
+        assertThrows(DataAccessException.class, () -> {dA.createGame("First Strand-type Game", 123);});
     }
 
     @Test
     void getGamePositive() throws DataAccessException, BadRequestException {
-        DA.clear();
-        DA.createGame("First Strand-type Game", 123);
-        assertEquals("First Strand-type Game", DA.getGame(123).gameName());
+        dA.clear();
+        dA.createGame("First Strand-type Game", 123);
+        assertEquals("First Strand-type Game", dA.getGame(123).gameName());
     }
 
     @Test
     void getGameNegative() throws DataAccessException {
-        DA.clear();
-        DA.createGame("First Strand-type Game", 123);
-        assertThrows(BadRequestException.class, () -> {DA.getGame(1);});
+        dA.clear();
+        dA.createGame("First Strand-type Game", 123);
+        assertThrows(BadRequestException.class, () -> {dA.getGame(1);});
     }
 
     @Test
     void updateGamePositive() throws DataAccessException, BadRequestException {
-        DA.clear();
-        DA.createGame("First Strand-type Game", 123);
-        var gameData = DA.getGame(123);
-        DA.updateGame(new GameData(123, "CrackerJack", "Epaminondas", "First Strand-type Game", gameData.game()));
-        assertEquals("CrackerJack", DA.getGame(123).whiteUsername());
+        dA.clear();
+        dA.createGame("First Strand-type Game", 123);
+        var gameData = dA.getGame(123);
+        dA.updateGame(new GameData(123, "CrackerJack", "Epaminondas", "First Strand-type Game", gameData.game()));
+        assertEquals("CrackerJack", dA.getGame(123).whiteUsername());
     }
 
     @Test
     void updateGameNegative() throws DataAccessException {
-        DA.clear();
-        assertThrows(BadRequestException.class, () -> {DA.updateGame(new GameData(123, "CrackerJack", "Epaminondas", "First Strand-type Game", new ChessGame()));});
+        dA.clear();
+        assertThrows(BadRequestException.class, () ->
+        {dA.updateGame(new GameData(123, "CrackerJack", "Epaminondas", "First Strand-type Game", new ChessGame()));});
     }
 }
