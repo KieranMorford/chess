@@ -1,5 +1,6 @@
 package dataaccess;
 
+import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
 import model.AuthData;
 import model.GameData;
@@ -15,7 +16,7 @@ public interface DataAccess {
     AuthData getAuth(String authToken) throws DataAccessException, UnauthorizedException;
     void deleteAuth(String authToken) throws DataAccessException, UnauthorizedException;
     List<GameData> listGames(String authToken);
-    GameData createGame(String gameName, int gameID);
-    GameData getGame(int gameID);
+    GameData createGame(String gameName, int gameID) throws DataAccessException;
+    GameData getGame(int gameID) throws DataAccessException, BadRequestException;
     void updateGame(GameData gameData);
 }

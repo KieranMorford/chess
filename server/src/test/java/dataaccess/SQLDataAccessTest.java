@@ -6,6 +6,10 @@ import model.AuthData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import requestresult.LoginRequest;
+import requestresult.NewGameRequest;
+import requestresult.RegisterRequest;
+import service.GameService;
 import service.UserService;
 
 import java.sql.SQLException;
@@ -14,13 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SQLDataAccessTest {
 
+    private SQLDataAccess DA = new SQLDataAccess();
+
+    SQLDataAccessTest() throws DataAccessException {
+    }
+
     @Test
     void clear() {
     }
 
     @Test
     void createUserPositive() throws DataAccessException {
-        var DA = new SQLDataAccess();
         var user = new UserData("link", "kronos", "kcmorford@gmail.com");
         UserData userR = null;
         DA.clear();
@@ -40,7 +48,6 @@ class SQLDataAccessTest {
 
     @Test
     void createUserNegative() throws DataAccessException {
-        var DA = new SQLDataAccess();
         var user = new UserData(null, "kronos", "kcmorford@gmail.com");
         UserData userR = null;
         DA.clear();
@@ -49,7 +56,6 @@ class SQLDataAccessTest {
 
     @Test
     void getUserPositive() throws DataAccessException {
-        var DA = new SQLDataAccess();
         var user = new UserData("link", "kronos", "kcmorford@gmail.com");
         DA.clear();
         DA.createUser(user);
@@ -59,14 +65,12 @@ class SQLDataAccessTest {
 
     @Test
     void getUserNegative() throws DataAccessException {
-        var DA = new SQLDataAccess();
         DA.clear();
         assertThrows(DataAccessException.class, () -> {DA.getUser(null);});
     }
 
     @Test
     void createAuthPositive() throws DataAccessException, UnauthorizedException {
-        var DA = new SQLDataAccess();
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -75,7 +79,6 @@ class SQLDataAccessTest {
 
     @Test
     void createAuthNegative() throws DataAccessException, UnauthorizedException {
-        var DA = new SQLDataAccess();
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -84,7 +87,6 @@ class SQLDataAccessTest {
 
     @Test
     void getAuthPositive() throws DataAccessException, UnauthorizedException {
-        var DA = new SQLDataAccess();
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -93,7 +95,6 @@ class SQLDataAccessTest {
 
     @Test
     void getAuthNegative() throws DataAccessException {
-        var DA = new SQLDataAccess();
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -102,7 +103,6 @@ class SQLDataAccessTest {
 
     @Test
     void deleteAuthPositive() throws DataAccessException {
-        var DA = new SQLDataAccess();
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -111,7 +111,6 @@ class SQLDataAccessTest {
 
     @Test
     void deleteAuthNegative() throws DataAccessException {
-        var DA = new SQLDataAccess();
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -121,7 +120,6 @@ class SQLDataAccessTest {
 
     @Test
     void listGamesPositive() {
-
     }
 
     @Test
@@ -129,19 +127,34 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void createGamePositive() {
+    void createGamePositive() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        DA.clear();
+        assertDoesNotThrow(() -> {DA.createGame("First Strand-type Game", 123);});
     }
 
     @Test
-    void createGameNegative() {
+    void createGameNegative() throws DataAccessException {
+        var DA = new SQLDataAccess();
+        DA.clear();
+        DA.createGame("First Strand-type Game", 123);
+        assertThrows(DataAccessException.class, () -> {DA.createGame("First Strand-type Game", 123);});
     }
 
     @Test
-    void getGamePositive() {
+    void getGamePositive() throws DataAccessException, BadRequestException {
+        var DA = new SQLDataAccess();
+        DA.clear();
+        DA.createGame("First Strand-type Game", 123);
+        assertEquals("First Strand-type Game", DA.getGame(123).gameName());
     }
 
     @Test
-    void getGameNegative() {
+    void getGameNegative() throws DataAccessException, BadRequestException {
+        var DA = new SQLDataAccess();
+        DA.clear();
+        DA.createGame("First Strand-type Game", 123);
+        assertThrows(BadRequestException.class, () -> {DA.getGame(1);});
     }
 
     @Test

@@ -16,10 +16,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserServiceTest {
 
+    private SQLDataAccess DA = new SQLDataAccess();
+
+    UserServiceTest() throws DataAccessException {
+    }
+
     @Test
     void registerPositiveTest() throws AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        UserService userService = new UserService(new SQLDataAccess());
+        UserService userService = new UserService(DA);
         userService.clear();
         var regRes = userService.register(regReq);
         assertEquals("link", regRes.username());
@@ -30,7 +35,7 @@ class UserServiceTest {
     void registerRepeatTest() throws AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq1 = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         RegisterRequest regReq2 = new RegisterRequest("link","zelda","kord@gmail.com");
-        UserService userService = new UserService(new SQLDataAccess());
+        UserService userService = new UserService(DA);
         userService.clear();
         userService.register(regReq1);
         assertThrows(AlreadyTakenException.class, () -> {userService.register(regReq2);});
@@ -39,7 +44,7 @@ class UserServiceTest {
     @Test
     void registerBadRequestTest() throws AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos",null);
-        UserService userService = new UserService(new SQLDataAccess());
+        UserService userService = new UserService(DA);
         userService.clear();
         assertThrows(BadRequestException.class, () -> {userService.register(regReq);});
     }
@@ -47,7 +52,7 @@ class UserServiceTest {
     @Test
     void loginPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        UserService userService = new UserService(new SQLDataAccess());
+        UserService userService = new UserService(DA);
         userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
@@ -58,7 +63,7 @@ class UserServiceTest {
     @Test
     void loginUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        UserService userService = new UserService(new SQLDataAccess());
+        UserService userService = new UserService(DA);
         userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","krony");
@@ -68,7 +73,7 @@ class UserServiceTest {
     @Test
     void loginBadRequestTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        UserService userService = new UserService(new SQLDataAccess());
+        UserService userService = new UserService(DA);
         userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest(null,"kronos");
@@ -78,7 +83,6 @@ class UserServiceTest {
     @Test
     void logoutPositiveTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        var DA = new SQLDataAccess();
         UserService userService = new UserService(DA);
         userService.clear();
         userService.register(regReq);
@@ -91,7 +95,6 @@ class UserServiceTest {
     @Test
     void logoutUnauthorizedTest() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        var DA = new SQLDataAccess();
         UserService userService = new UserService(DA);
         userService.clear();
         userService.register(regReq);
@@ -102,7 +105,6 @@ class UserServiceTest {
     @Test
     void clear() throws UnauthorizedException, AlreadyTakenException, BadRequestException, DataAccessException {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
-        var DA = new SQLDataAccess();
         UserService userService = new UserService(DA);
         GameService gameService = new GameService(DA);
         userService.clear();
