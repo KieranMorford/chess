@@ -88,6 +88,7 @@ class GameServiceTest {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         UserService userService = new UserService(DA);
         GameService gameService = new GameService(DA);
+        userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);
@@ -104,6 +105,7 @@ class GameServiceTest {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         UserService userService = new UserService(DA);
         GameService gameService = new GameService(DA);
+        userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);
@@ -119,6 +121,7 @@ class GameServiceTest {
         RegisterRequest regReq2 = new RegisterRequest("zelda","flash","hrmorford@gmail.com");
         UserService userService = new UserService(DA);
         GameService gameService = new GameService(DA);
+        userService.clear();
         userService.register(regReq1);
         userService.register(regReq2);
         LoginRequest logReq1 = new LoginRequest("link","kronos");
@@ -138,6 +141,7 @@ class GameServiceTest {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         UserService userService = new UserService(DA);
         GameService gameService = new GameService(DA);
+        userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);
@@ -156,6 +160,7 @@ class GameServiceTest {
         RegisterRequest regReq = new RegisterRequest("link","kronos","kcmorford@gmail.com");
         UserService userService = new UserService(DA);
         GameService gameService = new GameService(DA);
+        userService.clear();
         userService.register(regReq);
         LoginRequest logReq = new LoginRequest("link","kronos");
         var logRes = userService.login(logReq);

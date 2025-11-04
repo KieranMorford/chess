@@ -131,11 +131,21 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void listGamesPositive() {
+    void listGamesPositive() throws DataAccessException, UnauthorizedException {
+        var user = new AuthData("link", "token");
+        DA.clear();
+        DA.createAuth(user);
+        DA.createGame("First Strand-type Game", 123);
+        DA.createGame("Second Strand-type Game", 456);
+        DA.createGame("First Woman-With-a-Sword-type Game", 789);
+        var list = DA.listGames(user.authToken());
+        assertEquals(3, list.size());
     }
 
     @Test
-    void listGamesNegative() {
+    void listGamesNegative() throws DataAccessException {
+        DA.clear();
+        assertThrows(UnauthorizedException.class, () -> {DA.listGames("Token");});
     }
 
     @Test

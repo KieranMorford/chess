@@ -10,6 +10,7 @@ import model.UserData;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -120,8 +121,30 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public List<GameData> listGames(String authToken) {
-        return null;
+    public List<GameData> listGames(String authToken) throws DataAccessException, UnauthorizedException {
+        var serializer = new Gson();
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM AuthData WHERE authToken = ?;");
+            preparedStatement.setString(1, authToken);
+            var authSet = preparedStatement.executeQuery();
+            if (!authSet.next()) {
+                throw new UnauthorizedException("Unauthorized");
+            }
+            preparedStatement = conn.prepareStatement("SELECT * FROM GameData;");
+            var gameSet = preparedStatement.executeQuery();
+            List<GameData> list = new ArrayList<>();
+            while (gameSet.next()) {
+                var gameJson = gameSet.getString("game");
+                ChessGame chessGame = serializer.fromJson(gameJson, ChessGame.class);
+                list.add(new GameData(gameSet.getInt("gameID"), gameSet.getString("whiteUsername"),
+                        gameSet.getString("blackUsername"), gameSet.getString("gameName"), chessGame));
+            }
+            return list;
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("failed to get auth", ex);
+        } catch (UnauthorizedException ex) {
+            throw new UnauthorizedException(ex.getMessage());
+        }
     }
 
     @Override
