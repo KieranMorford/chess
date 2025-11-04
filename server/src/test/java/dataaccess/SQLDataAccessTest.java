@@ -1,8 +1,11 @@
 package dataaccess;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,7 +27,17 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void clear() {
+    void clear() throws DataAccessException {
+        DA.clear();
+        var user = new UserData("link", "kronos", "kcmorford@gmail.com");
+        DA.createUser(user);
+        var auth = new AuthData("link", "Token");
+        DA.createAuth(auth);
+        DA.createGame("First Strand-type Game", 123);
+        DA.clear();
+        assertNull(DA.getUser("link"));
+        assertThrows(UnauthorizedException.class, () -> {DA.getAuth("Token");});
+        assertThrows(BadRequestException.class, () -> {DA.getGame(123);});
     }
 
     @Test
@@ -49,7 +62,6 @@ class SQLDataAccessTest {
     @Test
     void createUserNegative() throws DataAccessException {
         var user = new UserData(null, "kronos", "kcmorford@gmail.com");
-        UserData userR = null;
         DA.clear();
         assertThrows(DataAccessException.class, () -> {DA.createUser(user);});
     }
@@ -78,7 +90,7 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void createAuthNegative() throws DataAccessException, UnauthorizedException {
+    void createAuthNegative() throws DataAccessException {
         var auth = new AuthData("link", "Token");
         DA.clear();
         DA.createAuth(auth);
@@ -128,14 +140,12 @@ class SQLDataAccessTest {
 
     @Test
     void createGamePositive() throws DataAccessException {
-        var DA = new SQLDataAccess();
         DA.clear();
         assertDoesNotThrow(() -> {DA.createGame("First Strand-type Game", 123);});
     }
 
     @Test
     void createGameNegative() throws DataAccessException {
-        var DA = new SQLDataAccess();
         DA.clear();
         DA.createGame("First Strand-type Game", 123);
         assertThrows(DataAccessException.class, () -> {DA.createGame("First Strand-type Game", 123);});
@@ -143,25 +153,30 @@ class SQLDataAccessTest {
 
     @Test
     void getGamePositive() throws DataAccessException, BadRequestException {
-        var DA = new SQLDataAccess();
         DA.clear();
         DA.createGame("First Strand-type Game", 123);
         assertEquals("First Strand-type Game", DA.getGame(123).gameName());
     }
 
     @Test
-    void getGameNegative() throws DataAccessException, BadRequestException {
-        var DA = new SQLDataAccess();
+    void getGameNegative() throws DataAccessException {
         DA.clear();
         DA.createGame("First Strand-type Game", 123);
         assertThrows(BadRequestException.class, () -> {DA.getGame(1);});
     }
 
     @Test
-    void updateGamePositive() {
+    void updateGamePositive() throws DataAccessException, BadRequestException {
+        DA.clear();
+        DA.createGame("First Strand-type Game", 123);
+        var gameData = DA.getGame(123);
+        DA.updateGame(new GameData(123, "CrackerJack", "Epaminondas", "First Strand-type Game", gameData.game()));
+        assertEquals("CrackerJack", DA.getGame(123).whiteUsername());
     }
 
     @Test
-    void updateGameNegative() {
+    void updateGameNegative() throws DataAccessException {
+        DA.clear();
+        assertThrows(BadRequestException.class, () -> {DA.updateGame(new GameData(123, "CrackerJack", "Epaminondas", "First Strand-type Game", new ChessGame()));});
     }
 }

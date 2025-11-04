@@ -169,10 +169,17 @@ public class SQLDataAccess implements DataAccess {
     }
 
     @Override
-    public void updateGame(GameData gameData) throws DataAccessException {
+    public void updateGame(GameData gameData) throws DataAccessException, BadRequestException {
         var serializer = new Gson();
         String gameJson = serializer.toJson(gameData.game());
         try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement(
+                    "SELECT gameID, whiteUsername, blackUsername, gameName, game FROM GameData WHERE gameID = ?;");
+            preparedStatement.setString(1, Integer.toString(gameData.gameID()));
+            var gameSet = preparedStatement.executeQuery();
+            if (!gameSet.next()) {
+                throw new BadRequestException("No Game with given ID");
+            }
             var preparedStatement1 = conn.prepareStatement("DELETE FROM GameData WHERE gameID = ?;");
             preparedStatement1.setInt(1, gameData.gameID());
             preparedStatement1.executeUpdate();
@@ -186,6 +193,8 @@ public class SQLDataAccess implements DataAccess {
             preparedStatement2.executeUpdate();
         } catch (SQLException | DataAccessException ex) {
             throw new DataAccessException("failed to update game", ex);
+        } catch (BadRequestException ex) {
+            throw new BadRequestException(ex.getMessage());
         }
     }
 
