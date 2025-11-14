@@ -34,16 +34,22 @@ public class REPL {
                 var msg = e.toString();
                 System.out.print(msg);
             }
-            if (result.equals("Registered Successfully! You are now Logged in!")) {
+            if (result.equals("Registered Successfully! You are now Logged in!") || result.equals("Logged In Successfully!")) {
                 LoggedInClient lIClient = new LoggedInClient(serverUrl);
-                new REPL()
+                new REPL(lIClient, serverUrl).run();
             }
         }
         System.out.println();
     }
 
     private void printPrompt() {
-        System.out.print("\n" + ">>> ");
+        String state = null;
+        if (client.getClass() == LoggedOutClient.class) {
+            state = "[LOGGED_OUT]";
+        } else if (client.getClass() == LoggedInClient.class) {
+            state = "[LOGGED_IN]";
+        }
+        System.out.print("\n" + state + " >>> ");
     }
 
 }

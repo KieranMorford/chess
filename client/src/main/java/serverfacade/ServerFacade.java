@@ -1,6 +1,8 @@
 package serverfacade;
 
 import com.google.gson.Gson;
+import requestresult.LoginRequest;
+import requestresult.LoginResult;
 import requestresult.RegisterRequest;
 import requestresult.RegisterResult;
 
@@ -21,6 +23,12 @@ public class ServerFacade {
         var request = buildRequest("POST", "/user", regReq);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
+    }
+
+    public LoginResult login(LoginRequest loginReq) throws Exception {
+        var request = buildRequest("POST", "/session", loginReq);
+        var response = sendRequest(request);
+        return handleResponse(response, LoginResult.class);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body) {

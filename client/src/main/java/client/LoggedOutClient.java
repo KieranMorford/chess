@@ -1,5 +1,6 @@
 package client;
 
+import requestresult.LoginRequest;
 import requestresult.RegisterRequest;
 import serverfacade.ServerFacade;
 
@@ -26,7 +27,7 @@ public class LoggedOutClient implements Client {
                 default -> help();
             };
         } catch (Exception ex) {
-            return ex.getMessage();
+            return "bad";
         }
     }
 
@@ -47,7 +48,11 @@ public class LoggedOutClient implements Client {
             String username = params[0];
             String password = params[1];
             String email = params[2];
-            server.register(new RegisterRequest(username, password, email));
+            try {
+//                server.register(new RegisterRequest(username, password, email));
+            } catch (Exception ex) {
+                return "server error";
+            }
             return "Registered Successfully! You are now Logged in!";
         }
         throw new Exception("Expected: <USERNAME> <PASSWORD> <EMAIL>");
@@ -57,6 +62,8 @@ public class LoggedOutClient implements Client {
         if (params.length == 2) {
             String username = params[0];
             String password = params[1];
+            server.login(new LoginRequest(username, password));
+            return "Logged In Successfully!";
         }
         throw new Exception("Expected: <username><password>");
     }
