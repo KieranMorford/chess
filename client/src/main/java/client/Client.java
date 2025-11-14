@@ -1,5 +1,6 @@
 package client;
 
 public interface Client {
-    void help();
+    public String eval(String input);
+    public String help();
 }

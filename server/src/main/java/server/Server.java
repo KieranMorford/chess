@@ -48,8 +48,6 @@ public class Server {
         userServiceSQL = new UserService(sqlDataAccess);
         gameServiceM = new GameService(memoryDataAccess);
         gameServiceSQL = new GameService(sqlDataAccess);
-        // Register your endpoints and exception handlers here.
-
     }
 
     private void register(Context ctx) {
