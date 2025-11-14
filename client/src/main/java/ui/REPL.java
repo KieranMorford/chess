@@ -14,6 +14,7 @@ import static jdk.javadoc.internal.doclets.formats.html.markup.HtmlAttr.InputTyp
 public class REPL {
     private final Client client;
     private final String serverUrl;
+    private boolean quit = false;
 
     public REPL(Client client, String serverUrl) {
         this.client = client;
@@ -23,7 +24,7 @@ public class REPL {
     public void run() {
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("quit")) {
+        while (!result.equals("quit") && !result.equals("You have Successfully been Logged Out!")) {
             printPrompt();
             String line = scanner.nextLine();
 
@@ -36,8 +37,15 @@ public class REPL {
             }
             if (result.equals("Registered Successfully! You are now Logged in!") || result.equals("Logged In Successfully!")) {
                 LoggedInClient lIClient = new LoggedInClient(serverUrl);
-                new REPL(lIClient, serverUrl).run();
+                REPL nRepl = new REPL(lIClient, serverUrl);
+                nRepl.run();
+                if (nRepl.checkQuit()) {
+                    result = "quit";
+                }
             }
+        }
+        if (result.equals("quit")) {
+            quit = true;
         }
         System.out.println();
     }
@@ -52,4 +60,7 @@ public class REPL {
         System.out.print("\n" + state + " >>> ");
     }
 
+    private boolean checkQuit() {
+        return quit;
+    }
 }

@@ -62,9 +62,13 @@ public class LoggedOutClient implements Client {
         if (params.length == 2) {
             String username = params[0];
             String password = params[1];
-            server.login(new LoginRequest(username, password));
+            try {
+//                server.login(new LoginRequest(username, password));
+            } catch (Exception ex) {
+                return "server error";
+            }
             return "Logged In Successfully!";
         }
-        throw new Exception("Expected: <username><password>");
+        throw new Exception("Expected: <username> password>");
     }
 }

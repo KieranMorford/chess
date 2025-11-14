@@ -81,6 +81,6 @@ public class LoggedInClient implements Client{
     }
 
     public String logout() throws Exception {
-        return "logged out";
+        return "You have Successfully been Logged Out!";
     }
 }
