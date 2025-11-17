@@ -2,6 +2,9 @@ package client;
 
 import org.junit.jupiter.api.*;
 import server.Server;
+import serverfacade.ServerFacade;
+
+import java.io.IOException;
 
 
 public class ServerFacadeTests {
@@ -22,8 +25,60 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
+    public void registerPositiveTest() {
+
+    }
+
+    @Test
+    public void registerNegativeTest() {
+    }
+
+    @Test
+    public void loginPositiveTest() {
+    }
+
+    @Test
+    public void loginNegativeTest() {
+    }
+
+    @Test
+    public void logoutPositiveTest() {
+    }
+
+    @Test
+    public void logoutNegativeTest() {
+    }
+
+    @Test
+    public void createGamePositiveTest() {
+    }
+
+    @Test
+    public void createGameNegativeTest() {
+    }
+
+    @Test
+    public void listGamesPositiveTest() {
+    }
+
+    @Test
+    public void listGamesNegativeTest() {
+    }
+
+    @Test
+    public void playGamePositiveTest() {
+    }
+
+    @Test
+    public void playGameNegativeTest() {
+    }
+
+    @Test
+    public void observeGamePositiveTest() {
+    }
+
+    @Test
+    public void ObserveGameNegativeTest() {
     }
 
 }
