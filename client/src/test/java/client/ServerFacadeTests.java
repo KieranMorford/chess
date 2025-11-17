@@ -1,20 +1,28 @@
 package client;
 
+import dataaccess.DataAccessException;
+import dataaccess.SQLDataAccess;
+import exceptions.RequestException;
+import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
+import requestresult.RegisterRequest;
 import server.Server;
 import serverfacade.ServerFacade;
 
 import java.io.IOException;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class ServerFacadeTests {
 
     private static Server server;
+    private static String serverUrl = "http://localhost:8080";
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        var port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
     }
 
@@ -25,12 +33,21 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void registerPositiveTest() {
-
+    public void registerPositiveTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        assertEquals("linktest", sF.register(regReq).username());
     }
 
     @Test
-    public void registerNegativeTest() {
+    public void registerNegativeTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "Kronostest", null);
+        assertThrows(ResponseException.class, () -> sF.register(regReq));
     }
 
     @Test

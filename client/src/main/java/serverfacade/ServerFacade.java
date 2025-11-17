@@ -1,11 +1,14 @@
 package serverfacade;
 
+import exceptions.RequestException;
+import exceptions.ResponseException;
 import com.google.gson.Gson;
 import requestresult.LoginRequest;
 import requestresult.LoginResult;
 import requestresult.RegisterRequest;
 import requestresult.RegisterResult;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -49,23 +52,19 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws RequestException {
         try {
             return client.send(request, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception ex) {
-            throw new Exception(ex.getMessage());
+        } catch (IOException | InterruptedException ex) {
+            throw new RequestException(ex.getMessage());
         }
     }
 
-    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws Exception {
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         var status = response.statusCode();
+        String body = response.body();
         if (!isSuccessful(status)) {
-            var body = response.body();
-            if (body != null) {
-                throw new Exception();
-            }
-
-            throw new Exception();
+            throw new ResponseException("HTTP " + status + ": " + body);
         }
 
         if (responseClass != null) {
