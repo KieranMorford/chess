@@ -4,13 +4,8 @@ package ui;
 import client.Client;
 import client.LoggedInClient;
 import client.LoggedOutClient;
-import dataaccess.DataAccessException;
 
 import java.util.Scanner;
-
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GREEN;
-import static jdk.javadoc.internal.doclets.formats.html.markup.HtmlAttr.InputType.RESET;
 
 public class REPL {
     private final Client client;

@@ -1,8 +1,7 @@
 package client;
 
 import exceptions.RequestException;
-import requestresult.LoginRequest;
-import requestresult.RegisterRequest;
+import requestresult.*;
 import serverfacade.ServerFacade;
 
 import java.util.Arrays;
@@ -11,7 +10,6 @@ import static ui.EscapeSequences.*;
 
 public class LoggedOutClient implements Client {
     private final ServerFacade server;
-    private String username;
     private String authToken;
 
     public LoggedOutClient(String serverUrl) {

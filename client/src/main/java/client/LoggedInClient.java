@@ -1,9 +1,6 @@
 package client;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import dataaccess.SQLDataAccess;
-import exceptions.RequestException;
 import requestresult.*;
 import serverfacade.ServerFacade;
 
@@ -20,7 +17,7 @@ public class LoggedInClient implements Client{
     private final ServerFacade server;
     private final String authToken;
 
-    public LoggedInClient(String serverUrl, String authToken) throws DataAccessException {
+    public LoggedInClient(String serverUrl, String authToken) {
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
     }
@@ -81,7 +78,7 @@ public class LoggedInClient implements Client{
         throw new Exception("Expected: <NAME>");
     }
 
-    public String listGames() throws Exception {
+    public String listGames() {
         GetGameListResult result = null;
         try {
             result = server.listGames(authToken);
