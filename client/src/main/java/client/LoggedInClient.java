@@ -1,5 +1,9 @@
 package client;
 
+import dataaccess.DataAccessException;
+import dataaccess.SQLDataAccess;
+import exceptions.RequestException;
+import requestresult.LogoutRequest;
 import requestresult.RegisterRequest;
 import serverfacade.ServerFacade;
 
@@ -13,9 +17,11 @@ import static ui.EscapeSequences.SET_TEXT_ITALIC;
 
 public class LoggedInClient implements Client{
     private final ServerFacade server;
+    private final String authToken;
 
-    public LoggedInClient(String serverUrl) {
+    public LoggedInClient(String serverUrl, String authToken) throws DataAccessException {
         server = new ServerFacade(serverUrl);
+        this.authToken = authToken;
     }
 
     @Override
@@ -27,7 +33,7 @@ public class LoggedInClient implements Client{
             return switch (cmd) {
                 case "create" -> createGame(params);
                 case "list" -> listGames();
-                case "join" -> joinGame(params);
+                case "join" -> playGame(params);
                 case "observe" -> observe(params);
                 case "logout" -> logout();
                 case "quit" -> "quit";
@@ -56,6 +62,11 @@ public class LoggedInClient implements Client{
                 + SET_TEXT_ITALIC + " - display possible commands" + RESET_TEXT_ITALIC;
     }
 
+    @Override
+    public String getAuthToken() {
+        return "";
+    }
+
     public String createGame(String[] params) throws Exception {
 //        if (params.length == 3) {
 //            String username = params[0];
@@ -72,7 +83,7 @@ public class LoggedInClient implements Client{
         return "game list";
     }
 
-    public String joinGame(String[] params) throws Exception {
+    public String playGame(String[] params) throws Exception {
         return "joined game";
     }
 
@@ -80,7 +91,12 @@ public class LoggedInClient implements Client{
         return "observed";
     }
 
-    public String logout() throws Exception {
+    public String logout() {
+        try {
+            server.logout(new LogoutRequest(authToken));
+        } catch (Exception ex) {
+            return ex.getMessage();
+        }
         return "You have Successfully been Logged Out!";
     }
 }

@@ -104,6 +104,23 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+    public AuthData getAuthByUser(String username) throws DataAccessException, UnauthorizedException {
+        try (var conn = DatabaseManager.getConnection()) {
+            var preparedStatement = conn.prepareStatement("SELECT authToken, username FROM AuthData WHERE username = ?;");
+            preparedStatement.setString(1, username);
+            var authSet = preparedStatement.executeQuery();
+            if (authSet.next()) {
+                return new AuthData(authSet.getString("username"), authSet.getString("authToken"));
+            } else  {
+                throw new UnauthorizedException("Unauthorized");
+            }
+        } catch (SQLException | DataAccessException ex) {
+            throw new DataAccessException("failed to get auth", ex);
+        } catch (UnauthorizedException ex) {
+            throw new UnauthorizedException(ex.getMessage());
+        }
+    }
+
     @Override
     public void deleteAuth(String authToken) throws DataAccessException, UnauthorizedException {
         try (var conn = DatabaseManager.getConnection()) {

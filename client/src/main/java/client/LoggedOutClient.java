@@ -10,6 +10,8 @@ import static ui.EscapeSequences.*;
 
 public class LoggedOutClient implements Client {
     private final ServerFacade server;
+    private String username;
+    private String authToken;
 
     public LoggedOutClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
@@ -49,7 +51,8 @@ public class LoggedOutClient implements Client {
             String password = params[1];
             String email = params[2];
             try {
-                server.register(new RegisterRequest(username, password, email));
+                var result = server.register(new RegisterRequest(username, password, email));
+                this.authToken = result.authToken();
             } catch (RequestException ex) {
                 return ex.getMessage();
             }
@@ -70,5 +73,10 @@ public class LoggedOutClient implements Client {
             return "Logged In Successfully!";
         }
         throw new Exception("Expected: <username> password>");
+    }
+
+    @Override
+    public String getAuthToken() {
+        return authToken;
     }
 }

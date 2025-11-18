@@ -3,10 +3,7 @@ package serverfacade;
 import exceptions.RequestException;
 import exceptions.ResponseException;
 import com.google.gson.Gson;
-import requestresult.LoginRequest;
-import requestresult.LoginResult;
-import requestresult.RegisterRequest;
-import requestresult.RegisterResult;
+import requestresult.*;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,18 +20,34 @@ public class ServerFacade {
     }
 
     public RegisterResult register(RegisterRequest regReq) throws Exception {
-        var request = buildRequest("POST", "/user", regReq);
+        var request = buildRequestB("POST", "/user", regReq);
         var response = sendRequest(request);
         return handleResponse(response, RegisterResult.class);
     }
 
     public LoginResult login(LoginRequest loginReq) throws Exception {
-        var request = buildRequest("POST", "/session", loginReq);
+        var request = buildRequestB("POST", "/session", loginReq);
         var response = sendRequest(request);
         return handleResponse(response, LoginResult.class);
     }
 
-    private HttpRequest buildRequest(String method, String path, Object body) {
+    public LogoutResult logout(LogoutRequest logoutReq) throws Exception {
+        var request = buildRequestH("DELETE", "/session", logoutReq.authToken());
+        var response = sendRequest(request);
+        return handleResponse(response, LogoutResult.class);
+    }
+
+    private HttpRequest buildRequestH(String method, String path, String header) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, HttpRequest.BodyPublishers.noBody());
+        if (header != null) {
+            request.setHeader("authorization", header);
+        }
+        return request.build();
+    }
+
+    private HttpRequest buildRequestB(String method, String path, Object body) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
                 .method(method, makeRequestBody(body));

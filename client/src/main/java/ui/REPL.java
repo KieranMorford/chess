@@ -4,6 +4,7 @@ package ui;
 import client.Client;
 import client.LoggedInClient;
 import client.LoggedOutClient;
+import dataaccess.DataAccessException;
 
 import java.util.Scanner;
 
@@ -36,7 +37,13 @@ public class REPL {
                 System.out.print(msg);
             }
             if (result.equals("Registered Successfully! You are now Logged in!") || result.equals("Logged In Successfully!")) {
-                LoggedInClient lIClient = new LoggedInClient(serverUrl);
+                LoggedInClient lIClient = null;
+                try {
+                    lIClient = new LoggedInClient(serverUrl, client.getAuthToken());
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
                 REPL nRepl = new REPL(lIClient, serverUrl);
                 nRepl.run();
                 if (nRepl.checkQuit()) {
