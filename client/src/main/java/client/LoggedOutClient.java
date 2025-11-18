@@ -28,6 +28,11 @@ public class LoggedOutClient implements Client {
                 default -> help();
             };
         } catch (Exception ex) {
+            if (ex.getMessage().equals("HTTP 401: {\"message\":\"Error: Unauthorized\"}")) {
+                return "Incorrect username or password";
+            } else if (ex.getMessage().equals("HTTP 403: {\"message\":\"Error: Username Already Taken\"}")) {
+                return "Username already taken";
+            }
             return ex.getMessage();
         }
     }

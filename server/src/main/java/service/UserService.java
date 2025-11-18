@@ -5,10 +5,10 @@ import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
 import org.mindrot.jbcrypt.BCrypt;
-import requestresult.*;
 import dataaccess.DataAccess;
 import model.AuthData;
 import model.UserData;
+import requestresult.*;
 
 import java.util.UUID;
 

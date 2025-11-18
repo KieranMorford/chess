@@ -1,19 +1,12 @@
 package dataaccess;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import requestresult.LoginRequest;
-import requestresult.NewGameRequest;
-import requestresult.RegisterRequest;
-import service.GameService;
-import service.UserService;
 
 import java.sql.SQLException;
 

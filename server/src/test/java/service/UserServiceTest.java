@@ -9,7 +9,6 @@ import requestresult.LoginRequest;
 import requestresult.LogoutRequest;
 import requestresult.NewGameRequest;
 import requestresult.RegisterRequest;
-import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

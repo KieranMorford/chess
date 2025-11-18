@@ -17,7 +17,6 @@ public class ServerFacade {
 
     public ServerFacade(String serverUrl) {
         this.serverUrl = serverUrl;
-        // test
     }
 
     public RegisterResult register(RegisterRequest regReq) throws Exception {

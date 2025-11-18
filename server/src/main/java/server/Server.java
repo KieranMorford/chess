@@ -5,16 +5,15 @@ import dataaccess.SQLDataAccess;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
-import requestresult.*;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.MemoryDataAccess;
 import io.javalin.*;
 import io.javalin.http.Context;
+import requestresult.*;
 import service.GameService;
 import service.UserService;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 

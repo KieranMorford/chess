@@ -5,13 +5,11 @@ import dataaccess.SQLDataAccess;
 import exceptions.AlreadyTakenException;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
-import org.junit.jupiter.api.AfterAll;
 import requestresult.JoinGameRequest;
 import requestresult.LoginRequest;
 import requestresult.NewGameRequest;
 import requestresult.RegisterRequest;
 import chess.ChessGame;
-import dataaccess.MemoryDataAccess;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

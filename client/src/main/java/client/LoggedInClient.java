@@ -8,7 +8,6 @@ import ui.DrawBoard;
 import java.util.Arrays;
 import java.util.Objects;
 
-import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.RESET_TEXT_ITALIC;
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
@@ -39,6 +38,9 @@ public class LoggedInClient implements Client{
                 default -> help();
             };
         } catch (Exception ex) {
+            if (ex.getMessage().equals("HTTP 403: {\"message\":\"Error: White Already Taken\"}")) {
+                return "Player position already taken";
+            }
             return ex.getMessage();
         }
     }
@@ -109,8 +111,9 @@ public class LoggedInClient implements Client{
 
     public String playGame(String[] params) throws Exception {
         ChessGame.TeamColor color = null;
-        int id = Integer.parseInt(params[0]);
+        int id = 0;
         if (params.length == 2) {
+            id = Integer.parseInt(params[0]);
             if (Objects.equals(params[1], "white")) {
                 color = ChessGame.TeamColor.WHITE;
             } else if (Objects.equals(params[1], "black")) {
@@ -120,23 +123,35 @@ public class LoggedInClient implements Client{
             try {
                 result = server.playGame(new JoinGameRequest(authToken, color, id));
             } catch (Exception ex) {
+                if (ex.getMessage().equals("HTTP 403: {\"message\":\"Error: White Already Taken\"}")) {
+                    return "Player position already taken";
+                } else if (ex.getMessage().equals("HTTP 400: {\"message\":\"Error: Bad Request\"}")) {
+                    return "Choose White or Black";
+                }
                 return ex.getMessage();
             }
-        }
-        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard());
+        } else throw new Exception("Expected: <ID> [WHITE|BLACK]");
+        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard(), color);
     }
 
     public String observeGame(String[] params) throws Exception {
-        int id = Integer.parseInt(params[0]);
+        int id = 0;
         if (params.length == 1) {
-            JoinGameResult result = null;
             try {
-                result = server.observeGame(new JoinGameRequest(authToken, null, id));
-            } catch (Exception ex) {
-                return ex.getMessage();
+                Integer.parseInt(params[0]);
+            } catch (NumberFormatException e) {
+                throw new Exception("Please enter an id number");
             }
-        }
-        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard());
+            id = Integer.parseInt(params[0]);
+            try {
+                server.observeGame(new JoinGameRequest(authToken, null, id));
+            } catch (Exception ex) {
+                if (ex.getMessage().equals("HTTP 400: {\"message\":\"Error: No Game with given ID\"}")) {
+                    return "No game with given id";
+                }
+            }
+        } else throw new Exception("Expected: <ID>");
+        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard(), ChessGame.TeamColor.WHITE);
     }
 
     public String logout() {
