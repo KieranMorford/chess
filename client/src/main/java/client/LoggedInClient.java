@@ -130,7 +130,7 @@ public class LoggedInClient implements Client{
             int id = Integer.parseInt(params[0]);
             JoinGameResult result = null;
             try {
-                result = server.playGame(new JoinGameRequest(authToken, null, id));
+                result = server.observeGame(new JoinGameRequest(authToken, null, id));
             } catch (Exception ex) {
                 return ex.getMessage();
             }
