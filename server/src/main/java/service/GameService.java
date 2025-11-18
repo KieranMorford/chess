@@ -50,9 +50,11 @@ public class GameService {
         if (dataAccess.getAuth(jGReq.authToken()) == null) {
             throw new UnauthorizedException("Unauthorized");
         }
-        if (jGReq.playerColor() != null && jGReq.playerColor().equals(ChessGame.TeamColor.WHITE) && dataAccess.getGame(jGReq.gameID()).whiteUsername() != null) {
+        if (jGReq.playerColor() != null && jGReq.playerColor().equals(ChessGame.TeamColor.WHITE)
+                && dataAccess.getGame(jGReq.gameID()).whiteUsername() != null) {
             throw new AlreadyTakenException("White Already Taken");
-        } else if (jGReq.playerColor() != null && jGReq.playerColor().equals(ChessGame.TeamColor.BLACK) && dataAccess.getGame(jGReq.gameID()).blackUsername() != null) {
+        } else if (jGReq.playerColor() != null && jGReq.playerColor().equals(ChessGame.TeamColor.BLACK)
+                && dataAccess.getGame(jGReq.gameID()).blackUsername() != null) {
             throw new AlreadyTakenException("White Already Taken");
         }
         var oldGame = dataAccess.getGame(jGReq.gameID());

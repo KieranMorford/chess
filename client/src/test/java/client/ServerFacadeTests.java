@@ -202,7 +202,7 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void ObserveGameNegativeTest() throws Exception {
+    public void observeGameNegativeTest() throws Exception {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);

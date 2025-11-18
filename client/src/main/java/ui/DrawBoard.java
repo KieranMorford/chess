@@ -8,25 +8,25 @@ public class DrawBoard {
     public static String render(ChessBoard board, ChessGame.TeamColor teamColor) {
         var sb = new StringBuilder();
         sb.append(ERASE_SCREEN);
-        Header(teamColor, sb);
+        header(teamColor, sb);
         if (teamColor == ChessGame.TeamColor.WHITE) {
-            BodyWhite(board, sb);
+            bodyWhite(board, sb);
         } else if (teamColor == ChessGame.TeamColor.BLACK) {
-            BodyBlack(board, sb);
+            bodyBlack(board, sb);
         }
-        Header(teamColor, sb);
+        header(teamColor, sb);
         sb.append(RESET_TEXT_COLOR).append(RESET_BG_COLOR);
 
         return sb.toString();
     }
 
-    private static void BodyWhite(ChessBoard board, StringBuilder sb) {
+    private static void bodyWhite(ChessBoard board, StringBuilder sb) {
         for (int row = 8; row >= 1; row--) {
             sb.append(SET_TEXT_COLOR_RED);
             sb.append(SET_BG_COLOR_LIGHT_GREY);
             sb.append(" ").append(row).append(" ");
             for (int col = 1; col <= 8; col++) {
-                Pieces(board, sb, row, col);
+                pieces(board, sb, row, col);
                 sb.append(" ");
             }
             sb.append(SET_TEXT_COLOR_RED);
@@ -36,13 +36,13 @@ public class DrawBoard {
         }
     }
 
-    private static void BodyBlack(ChessBoard board, StringBuilder sb) {
+    private static void bodyBlack(ChessBoard board, StringBuilder sb) {
         for (int row = 1; row <= 8; row++) {
             sb.append(SET_TEXT_COLOR_RED);
             sb.append(SET_BG_COLOR_LIGHT_GREY);
             sb.append(" ").append(row).append(" ");
             for (int col = 8; col >= 1; col--) {
-                Pieces(board, sb, row, col);
+                pieces(board, sb, row, col);
                 sb.append(" ");
             }
             sb.append(SET_TEXT_COLOR_RED);
@@ -52,7 +52,7 @@ public class DrawBoard {
         }
     }
 
-    private static void Pieces(ChessBoard board, StringBuilder sb, int row, int col) {
+    private static void pieces(ChessBoard board, StringBuilder sb, int row, int col) {
         if ((row + col) % 2 == 0) {
             sb.append(SET_TEXT_COLOR_BLACK);
             sb.append(SET_BG_COLOR_DARK_GREEN);
@@ -94,7 +94,7 @@ public class DrawBoard {
         }
     }
 
-    private static void Header(ChessGame.TeamColor teamColor, StringBuilder sb) {
+    private static void header(ChessGame.TeamColor teamColor, StringBuilder sb) {
         sb.append(SET_BG_COLOR_LIGHT_GREY);
         sb.append(SET_TEXT_COLOR_RED);
         if (teamColor == ChessGame.TeamColor.WHITE) {

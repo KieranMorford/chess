@@ -130,7 +130,9 @@ public class LoggedInClient implements Client{
                 }
                 return ex.getMessage();
             }
-        } else throw new Exception("Expected: <ID> [WHITE|BLACK]");
+        } else {
+            throw new Exception("Expected: <ID> [WHITE|BLACK]");
+        }
         return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard(), color);
     }
 
@@ -150,7 +152,9 @@ public class LoggedInClient implements Client{
                     return "No game with given id";
                 }
             }
-        } else throw new Exception("Expected: <ID>");
+        } else {
+            throw new Exception("Expected: <ID>");
+        }
         return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard(), ChessGame.TeamColor.WHITE);
     }
 
