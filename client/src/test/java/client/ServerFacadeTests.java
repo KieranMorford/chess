@@ -19,12 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ServerFacadeTests {
 
     private static Server server;
-    private static String serverUrl = "http://localhost:8080";
+    private String serverUrl;
 
     @BeforeEach
     public void init() {
         server = new Server();
-        var port = server.run(8080);
+        var port = server.run(0);
+        serverUrl = "http://localhost:" + port;
         System.out.println("Started test HTTP server on " + port);
     }
 
