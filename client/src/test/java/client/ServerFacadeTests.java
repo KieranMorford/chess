@@ -1,17 +1,12 @@
 package client;
 
 import chess.ChessGame;
-import chess.ChessPiece;
-import dataaccess.DataAccessException;
 import dataaccess.SQLDataAccess;
-import exceptions.RequestException;
 import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
 import requestresult.*;
 import server.Server;
 import serverfacade.ServerFacade;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
