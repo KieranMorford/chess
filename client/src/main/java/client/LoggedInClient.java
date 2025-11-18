@@ -113,6 +113,11 @@ public class LoggedInClient implements Client{
         ChessGame.TeamColor color = null;
         int id = 0;
         if (params.length == 2) {
+            try {
+                Integer.parseInt(params[0]);
+            } catch (NumberFormatException e) {
+                throw new Exception("Please enter an id number");
+            }
             id = Integer.parseInt(params[0]);
             if (Objects.equals(params[1], "white")) {
                 color = ChessGame.TeamColor.WHITE;
@@ -127,6 +132,8 @@ public class LoggedInClient implements Client{
                     return "Player position already taken";
                 } else if (ex.getMessage().equals("HTTP 400: {\"message\":\"Error: Bad Request\"}")) {
                     return "Choose White or Black";
+                } else if (ex.getMessage().equals("HTTP 400: {\"message\":\"Error: No Game with given ID\"}")) {
+                    return "No game with given id";
                 }
                 return ex.getMessage();
             }
