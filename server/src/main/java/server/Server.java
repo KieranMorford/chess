@@ -176,6 +176,7 @@ public class Server {
         var serializer = new Gson();
         try {
             userServiceSQL.clear();
+            gameServiceSQL.resetCounter();
         } catch (DataAccessException ex) {
             reportError(serializer, ctx, ex, 500);
         }

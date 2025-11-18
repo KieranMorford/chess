@@ -1,14 +1,13 @@
 package client;
 
+import chess.ChessGame;
+import chess.ChessPiece;
 import dataaccess.DataAccessException;
 import dataaccess.SQLDataAccess;
 import exceptions.RequestException;
 import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
-import requestresult.LoginRequest;
-import requestresult.LogoutRequest;
-import requestresult.NewGameRequest;
-import requestresult.RegisterRequest;
+import requestresult.*;
 import server.Server;
 import serverfacade.ServerFacade;
 
@@ -22,15 +21,15 @@ public class ServerFacadeTests {
     private static Server server;
     private static String serverUrl = "http://localhost:8080";
 
-    @BeforeAll
-    public static void init() {
+    @BeforeEach
+    public void init() {
         server = new Server();
         var port = server.run(8080);
         System.out.println("Started test HTTP server on " + port);
     }
 
-    @AfterAll
-    static void stopServer() {
+    @AfterEach
+    void stopServer() {
         server.stop();
     }
 
@@ -161,11 +160,33 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void playGamePositiveTest() {
+    public void playGamePositiveTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "Towerstest");
+        sF.createGame(nGReq);
+        var pGReq = new JoinGameRequest(dA.getAuthByUser("linktest").authToken(), ChessGame.TeamColor.WHITE, 1);
+        sF.playGame(pGReq);
+        var list = sF.listGames(dA.getAuthByUser("linktest").authToken());
+        assertEquals("linktest", list.games().getFirst().whiteUsername());
+        dA.clear();
     }
 
     @Test
-    public void playGameNegativeTest() {
+    public void playGameNegativeTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "Towerstest");
+        sF.createGame(nGReq);
+        var pGReq = new JoinGameRequest(dA.getAuthByUser("linktest").authToken(), ChessGame.TeamColor.WHITE, 0);
+        assertThrows(ResponseException.class, () -> sF.playGame(pGReq));
+        dA.clear();
     }
 
     @Test
