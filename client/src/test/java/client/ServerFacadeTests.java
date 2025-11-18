@@ -190,11 +190,33 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void observeGamePositiveTest() {
+    public void observeGamePositiveTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "Towerstest");
+        sF.createGame(nGReq);
+        var oGReq = new JoinGameRequest(dA.getAuthByUser("linktest").authToken(), null, 1);
+        sF.observeGame(oGReq);
+        var list = sF.listGames(dA.getAuthByUser("linktest").authToken());
+        assertNull(list.games().getFirst().whiteUsername());
+        dA.clear();
     }
 
     @Test
-    public void ObserveGameNegativeTest() {
+    public void ObserveGameNegativeTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "Towerstest");
+        sF.createGame(nGReq);
+        var oGReq = new JoinGameRequest(dA.getAuthByUser("linktest").authToken(), null, 2);
+        assertThrows(ResponseException.class, () ->sF.observeGame(oGReq));
+        dA.clear();
     }
 
 }

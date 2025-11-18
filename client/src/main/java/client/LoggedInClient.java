@@ -1,15 +1,14 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import dataaccess.SQLDataAccess;
 import exceptions.RequestException;
-import requestresult.GetGameListResult;
-import requestresult.LogoutRequest;
-import requestresult.NewGameRequest;
-import requestresult.RegisterRequest;
+import requestresult.*;
 import serverfacade.ServerFacade;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
@@ -36,7 +35,7 @@ public class LoggedInClient implements Client{
                 case "create" -> createGame(params);
                 case "list" -> listGames();
                 case "join" -> playGame(params);
-                case "observe" -> observe(params);
+                case "observe" -> observeGame(params);
                 case "logout" -> logout();
                 case "quit" -> "quit";
                 default -> help();
@@ -111,10 +110,34 @@ public class LoggedInClient implements Client{
     }
 
     public String playGame(String[] params) throws Exception {
+        if (params.length == 2) {
+            int id = Integer.parseInt(params[0]);
+            ChessGame.TeamColor color = null;
+            if (Objects.equals(params[1], "white")) {
+                color = ChessGame.TeamColor.WHITE;
+            } else if (Objects.equals(params[1], "black")) {
+                color = ChessGame.TeamColor.BLACK;
+            }
+            JoinGameResult result = null;
+            try {
+                result = server.playGame(new JoinGameRequest(authToken, color, id));
+            } catch (Exception ex) {
+                return ex.getMessage();
+            }
+        }
         return "joined game";
     }
 
-    public String observe(String[] params) throws Exception {
+    public String observeGame(String[] params) throws Exception {
+        if (params.length == 1) {
+            int id = Integer.parseInt(params[0]);
+            JoinGameResult result = null;
+            try {
+                result = server.playGame(new JoinGameRequest(authToken, null, id));
+            } catch (Exception ex) {
+                return ex.getMessage();
+            }
+        }
         return "observed";
     }
 
