@@ -43,6 +43,12 @@ public class ServerFacade {
         return handleResponse(response, NewGameResult.class);
     }
 
+    public GetGameListResult listGames(String authToken) throws Exception {
+        var request = buildRequestH("Get", "/game", authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, GetGameListResult.class);
+    }
+
     private HttpRequest buildRequestH(String method, String path, String header) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))

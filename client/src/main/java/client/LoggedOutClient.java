@@ -67,7 +67,8 @@ public class LoggedOutClient implements Client {
             String username = params[0];
             String password = params[1];
             try {
-                server.login(new LoginRequest(username, password));
+                var result = server.login(new LoginRequest(username, password));
+                this.authToken = result.authToken();
             } catch (RequestException ex) {
                 return ex.getMessage();
             }

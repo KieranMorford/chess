@@ -42,6 +42,7 @@ public class ServerFacadeTests {
         var sF = new ServerFacade(serverUrl);
         var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
         assertEquals("linktest", sF.register(regReq).username());
+        dA.clear();
     }
 
     @Test
@@ -51,6 +52,7 @@ public class ServerFacadeTests {
         var sF = new ServerFacade(serverUrl);
         var regReq = new RegisterRequest("linktest", "kronostest", null);
         assertThrows(ResponseException.class, () -> sF.register(regReq));
+        dA.clear();
     }
 
     @Test
@@ -64,6 +66,7 @@ public class ServerFacadeTests {
         sF.logout(lOReq);
         var lIReq =  new LoginRequest("linktest", "kronostest");
         assertDoesNotThrow(() -> sF.login(lIReq));
+        dA.clear();
     }
 
     @Test
@@ -77,6 +80,7 @@ public class ServerFacadeTests {
         sF.logout(lOReq);
         var lIReq =  new LoginRequest("linktest", "bad");
         assertThrows(ResponseException.class, () -> sF.login(lIReq));
+        dA.clear();
     }
 
     @Test
@@ -89,6 +93,7 @@ public class ServerFacadeTests {
         var lORequest = new LogoutRequest(dA.getAuthByUser("linktest").authToken());
         sF.logout(lORequest);
         assertThrows(ResponseException.class, () -> sF.logout(lORequest));
+        dA.clear();
     }
 
     @Test
@@ -100,6 +105,7 @@ public class ServerFacadeTests {
         sF.register(regReq);
         var lORequest = new LogoutRequest("bad");
         assertThrows(ResponseException.class, () -> sF.logout(lORequest));
+        dA.clear();
     }
 
     @Test
@@ -112,6 +118,7 @@ public class ServerFacadeTests {
         var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "testgame");
         sF.createGame(nGReq);
         assertEquals(nGReq.gameName(), dA.getGame(1).gameName());
+        dA.clear();
     }
 
     @Test
@@ -123,14 +130,34 @@ public class ServerFacadeTests {
         sF.register(regReq);
         var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), null);
         assertThrows(ResponseException.class, () ->  sF.createGame(nGReq));
+        dA.clear();
     }
 
     @Test
-    public void listGamesPositiveTest() {
+    public void listGamesPositiveTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "Towerstest");
+        sF.createGame(nGReq);
+        var list = sF.listGames(dA.getAuthByUser("linktest").authToken());
+        assertEquals("Towerstest", list.games().getFirst().gameName());
+        dA.clear();
     }
 
     @Test
-    public void listGamesNegativeTest() {
+    public void listGamesNegativeTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "Towerstest");
+        sF.createGame(nGReq);
+        assertThrows(ResponseException.class, () -> sF.listGames("bad"));
+        dA.clear();
     }
 
     @Test

@@ -3,6 +3,7 @@ package client;
 import dataaccess.DataAccessException;
 import dataaccess.SQLDataAccess;
 import exceptions.RequestException;
+import requestresult.GetGameListResult;
 import requestresult.LogoutRequest;
 import requestresult.NewGameRequest;
 import requestresult.RegisterRequest;
@@ -65,7 +66,7 @@ public class LoggedInClient implements Client{
 
     @Override
     public String getAuthToken() {
-        return "";
+        return authToken;
     }
 
     public String createGame(String[] params) throws Exception {
@@ -82,7 +83,31 @@ public class LoggedInClient implements Client{
     }
 
     public String listGames() throws Exception {
-        return "game list";
+        GetGameListResult result = null;
+        try {
+            result = server.listGames(authToken);
+        } catch (Exception ex) {
+            return ex.getMessage();
+        }
+        var list = result.games();
+        StringBuilder sb = new StringBuilder();
+        for (var game : list) {
+            String wU;
+            String bU;
+            if (game.whiteUsername() == null) {
+                wU = "No Player";
+            } else {
+                wU = game.whiteUsername();
+            }
+            if (game.blackUsername() == null) {
+                bU = "No Player";
+            } else {
+                bU = game.blackUsername();
+            }
+            sb.append("Game ID: ").append(game.gameID()).append("  Game Name: ").append(game.gameName())
+                    .append("  White Player: ").append(wU).append("  Black Player: ").append(bU).append("\n");
+        }
+        return sb.toString();
     }
 
     public String playGame(String[] params) throws Exception {
