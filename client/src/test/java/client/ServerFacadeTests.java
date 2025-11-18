@@ -5,6 +5,7 @@ import dataaccess.SQLDataAccess;
 import exceptions.RequestException;
 import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
+import requestresult.LoginRequest;
 import requestresult.LogoutRequest;
 import requestresult.RegisterRequest;
 import server.Server;
@@ -52,11 +53,29 @@ public class ServerFacadeTests {
     }
 
     @Test
-    public void loginPositiveTest() {
+    public void loginPositiveTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var lOReq = new LogoutRequest(dA.getAuthByUser("linktest").authToken());
+        sF.logout(lOReq);
+        var lIReq =  new LoginRequest("linktest", "Kronostest");
+        assertDoesNotThrow(() -> sF.login(lIReq));
     }
 
     @Test
-    public void loginNegativeTest() {
+    public void loginNegativeTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var lOReq = new LogoutRequest(dA.getAuthByUser("linktest").authToken());
+        sF.logout(lOReq);
+        var lIReq =  new LoginRequest("linktest", "bad");
+        assertThrows(ResponseException.class, () -> sF.login(lIReq));
     }
 
     @Test

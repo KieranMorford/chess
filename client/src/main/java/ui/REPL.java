@@ -36,7 +36,7 @@ public class REPL {
                 var msg = e.toString();
                 System.out.print(msg);
             }
-            if (result.equals("Registered Successfully! You are now Logged in!") || result.equals("Logged In Successfully!")) {
+            if (result != null && (result.equals("Registered Successfully! You are now Logged in!") || result.equals("Logged In Successfully!"))) {
                 LoggedInClient lIClient = null;
                 try {
                     lIClient = new LoggedInClient(serverUrl, client.getAuthToken());

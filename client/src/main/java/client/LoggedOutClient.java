@@ -1,6 +1,7 @@
 package client;
 
 import exceptions.RequestException;
+import requestresult.LoginRequest;
 import requestresult.RegisterRequest;
 import serverfacade.ServerFacade;
 
@@ -66,9 +67,9 @@ public class LoggedOutClient implements Client {
             String username = params[0];
             String password = params[1];
             try {
-//                server.login(new LoginRequest(username, password));
-            } catch (Exception ex) {
-                return "server error";
+                server.login(new LoginRequest(username, password));
+            } catch (RequestException ex) {
+                return ex.getMessage();
             }
             return "Logged In Successfully!";
         }
