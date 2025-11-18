@@ -37,6 +37,12 @@ public class ServerFacade {
         return handleResponse(response, LogoutResult.class);
     }
 
+    public NewGameResult createGame(NewGameRequest newGameReq) throws Exception {
+        var request = buildRequestHB("POST", "/game", newGameReq.authToken(), newGameReq);
+        var response = sendRequest(request);
+        return handleResponse(response, NewGameResult.class);
+    }
+
     private HttpRequest buildRequestH(String method, String path, String header) {
         var request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + path))
@@ -53,6 +59,16 @@ public class ServerFacade {
                 .method(method, makeRequestBody(body));
         if (body != null) {
             request.setHeader("Content-Type", "application/json");
+        }
+        return request.build();
+    }
+
+    private HttpRequest buildRequestHB(String method, String path, String header, Object body) {
+        var request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .method(method, makeRequestBody(body));
+        if (header != null) {
+            request.setHeader("authorization", header);
         }
         return request.build();
     }

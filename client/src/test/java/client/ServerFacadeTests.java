@@ -7,6 +7,7 @@ import exceptions.ResponseException;
 import org.junit.jupiter.api.*;
 import requestresult.LoginRequest;
 import requestresult.LogoutRequest;
+import requestresult.NewGameRequest;
 import requestresult.RegisterRequest;
 import server.Server;
 import serverfacade.ServerFacade;
@@ -39,7 +40,7 @@ public class ServerFacadeTests {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);
-        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
         assertEquals("linktest", sF.register(regReq).username());
     }
 
@@ -48,7 +49,7 @@ public class ServerFacadeTests {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);
-        var regReq = new RegisterRequest("linktest", "Kronostest", null);
+        var regReq = new RegisterRequest("linktest", "kronostest", null);
         assertThrows(ResponseException.class, () -> sF.register(regReq));
     }
 
@@ -57,11 +58,11 @@ public class ServerFacadeTests {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);
-        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
         sF.register(regReq);
         var lOReq = new LogoutRequest(dA.getAuthByUser("linktest").authToken());
         sF.logout(lOReq);
-        var lIReq =  new LoginRequest("linktest", "Kronostest");
+        var lIReq =  new LoginRequest("linktest", "kronostest");
         assertDoesNotThrow(() -> sF.login(lIReq));
     }
 
@@ -70,7 +71,7 @@ public class ServerFacadeTests {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);
-        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
         sF.register(regReq);
         var lOReq = new LogoutRequest(dA.getAuthByUser("linktest").authToken());
         sF.logout(lOReq);
@@ -83,7 +84,7 @@ public class ServerFacadeTests {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);
-        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
         sF.register(regReq);
         var lORequest = new LogoutRequest(dA.getAuthByUser("linktest").authToken());
         sF.logout(lORequest);
@@ -95,18 +96,33 @@ public class ServerFacadeTests {
         SQLDataAccess dA = new SQLDataAccess();
         dA.clear();
         var sF = new ServerFacade(serverUrl);
-        var regReq = new RegisterRequest("linktest", "Kronostest", "lk@gmail.com");
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
         sF.register(regReq);
         var lORequest = new LogoutRequest("bad");
         assertThrows(ResponseException.class, () -> sF.logout(lORequest));
     }
 
     @Test
-    public void createGamePositiveTest() {
+    public void createGamePositiveTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), "testgame");
+        sF.createGame(nGReq);
+        assertEquals(nGReq.gameName(), dA.getGame(1).gameName());
     }
 
     @Test
-    public void createGameNegativeTest() {
+    public void createGameNegativeTest() throws Exception {
+        SQLDataAccess dA = new SQLDataAccess();
+        dA.clear();
+        var sF = new ServerFacade(serverUrl);
+        var regReq = new RegisterRequest("linktest", "kronostest", "lk@gmail.com");
+        sF.register(regReq);
+        var nGReq = new NewGameRequest(dA.getAuthByUser("linktest").authToken(), null);
+        assertThrows(ResponseException.class, () ->  sF.createGame(nGReq));
     }
 
     @Test

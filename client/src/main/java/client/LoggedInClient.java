@@ -4,6 +4,7 @@ import dataaccess.DataAccessException;
 import dataaccess.SQLDataAccess;
 import exceptions.RequestException;
 import requestresult.LogoutRequest;
+import requestresult.NewGameRequest;
 import requestresult.RegisterRequest;
 import serverfacade.ServerFacade;
 
@@ -68,15 +69,16 @@ public class LoggedInClient implements Client{
     }
 
     public String createGame(String[] params) throws Exception {
-//        if (params.length == 3) {
-//            String username = params[0];
-//            String password = params[1];
-//            String email = params[2];
-//            server.register(new RegisterRequest(username, password, email));
-//            return "Registered Successfully! You are now Logged in!";
-//        }
-//        throw new Exception("Expected: <USERNAME> <PASSWORD> <EMAIL>");
-        return "game made";
+        if (params.length == 1) {
+            String name = params[0];
+            try {
+                server.createGame(new NewGameRequest(authToken, name));
+            } catch (Exception ex) {
+                return ex.getMessage();
+            }
+            return "New Game Created!";
+        }
+        throw new Exception("Expected: <NAME>");
     }
 
     public String listGames() throws Exception {
