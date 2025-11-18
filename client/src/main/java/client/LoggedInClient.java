@@ -3,6 +3,7 @@ package client;
 import chess.ChessGame;
 import requestresult.*;
 import serverfacade.ServerFacade;
+import ui.DrawBoard;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -108,8 +109,8 @@ public class LoggedInClient implements Client{
 
     public String playGame(String[] params) throws Exception {
         ChessGame.TeamColor color = null;
+        int id = Integer.parseInt(params[0]);
         if (params.length == 2) {
-            int id = Integer.parseInt(params[0]);
             if (Objects.equals(params[1], "white")) {
                 color = ChessGame.TeamColor.WHITE;
             } else if (Objects.equals(params[1], "black")) {
@@ -122,13 +123,12 @@ public class LoggedInClient implements Client{
                 return ex.getMessage();
             }
         }
-
-        return "joined game";
+        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard());
     }
 
     public String observeGame(String[] params) throws Exception {
+        int id = Integer.parseInt(params[0]);
         if (params.length == 1) {
-            int id = Integer.parseInt(params[0]);
             JoinGameResult result = null;
             try {
                 result = server.observeGame(new JoinGameRequest(authToken, null, id));
@@ -136,7 +136,7 @@ public class LoggedInClient implements Client{
                 return ex.getMessage();
             }
         }
-        return "observed";
+        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard());
     }
 
     public String logout() {

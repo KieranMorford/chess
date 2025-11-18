@@ -71,8 +71,4 @@ public class GameService {
     public int generateGameId() {
         return gameIDCounter.getAndIncrement();
     }
-
-    public void resetCounter() {
-        gameIDCounter.set(1);
-    }
 }
