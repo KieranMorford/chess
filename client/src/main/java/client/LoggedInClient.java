@@ -131,9 +131,8 @@ public class LoggedInClient implements Client{
             } else if (Objects.equals(params[1], "black")) {
                 color = ChessGame.TeamColor.BLACK;
             }
-            JoinGameResult result = null;
             try {
-                result = server.playGame(new JoinGameRequest(authToken, color, gameList.get(id).gameID()));
+                server.playGame(new JoinGameRequest(authToken, color, gameList.get(id).gameID()));
             } catch (Exception ex) {
                 if (ex.getMessage().equals("HTTP 403: {\"message\":\"Error: White Already Taken\"}")) {
                     return "Player position already taken";
