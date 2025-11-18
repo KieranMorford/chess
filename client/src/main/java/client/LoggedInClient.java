@@ -107,9 +107,9 @@ public class LoggedInClient implements Client{
     }
 
     public String playGame(String[] params) throws Exception {
+        ChessGame.TeamColor color = null;
         if (params.length == 2) {
             int id = Integer.parseInt(params[0]);
-            ChessGame.TeamColor color = null;
             if (Objects.equals(params[1], "white")) {
                 color = ChessGame.TeamColor.WHITE;
             } else if (Objects.equals(params[1], "black")) {
@@ -122,6 +122,7 @@ public class LoggedInClient implements Client{
                 return ex.getMessage();
             }
         }
+
         return "joined game";
     }
 
