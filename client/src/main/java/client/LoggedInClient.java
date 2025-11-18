@@ -1,11 +1,13 @@
 package client;
 
 import chess.ChessGame;
+import model.GameData;
 import requestresult.*;
 import serverfacade.ServerFacade;
 import ui.DrawBoard;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
@@ -16,6 +18,7 @@ import static ui.EscapeSequences.SET_TEXT_ITALIC;
 public class LoggedInClient implements Client{
     private final ServerFacade server;
     private final String authToken;
+    private Map<Integer, GameData> gameList;
 
     public LoggedInClient(String serverUrl, String authToken) {
         server = new ServerFacade(serverUrl);
@@ -82,6 +85,7 @@ public class LoggedInClient implements Client{
     }
 
     public String listGames() {
+        gameList.clear();
         GetGameListResult result = null;
         try {
             result = server.listGames(authToken);
@@ -90,7 +94,9 @@ public class LoggedInClient implements Client{
         }
         var list = result.games();
         StringBuilder sb = new StringBuilder();
+        int i = 1;
         for (var game : list) {
+            gameList.put(i, game);
             String wU;
             String bU;
             if (game.whiteUsername() == null) {
@@ -103,8 +109,9 @@ public class LoggedInClient implements Client{
             } else {
                 bU = game.blackUsername();
             }
-            sb.append("Game ID: ").append(game.gameID()).append("  Game Name: ").append(game.gameName())
+            sb.append("Game ID: ").append(i).append("  Game Name: ").append(game.gameName())
                     .append("  White Player: ").append(wU).append("  Black Player: ").append(bU).append("\n");
+            i++;
         }
         return sb.toString();
     }
@@ -126,7 +133,7 @@ public class LoggedInClient implements Client{
             }
             JoinGameResult result = null;
             try {
-                result = server.playGame(new JoinGameRequest(authToken, color, id));
+                result = server.playGame(new JoinGameRequest(authToken, color, gameList.get(id).gameID()));
             } catch (Exception ex) {
                 if (ex.getMessage().equals("HTTP 403: {\"message\":\"Error: White Already Taken\"}")) {
                     return "Player position already taken";
