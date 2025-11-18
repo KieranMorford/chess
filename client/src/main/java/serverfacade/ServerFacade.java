@@ -44,7 +44,7 @@ public class ServerFacade {
     }
 
     public GetGameListResult listGames(String authToken) throws Exception {
-        var request = buildRequestH("Get", "/game", authToken);
+        var request = buildRequestH("GET", "/game", authToken);
         var response = sendRequest(request);
         return handleResponse(response, GetGameListResult.class);
     }
@@ -56,7 +56,7 @@ public class ServerFacade {
     }
 
     public JoinGameResult observeGame(JoinGameRequest joinGameReq) throws Exception {
-        var request = buildRequestHB("PUT", "/game", joinGameReq.authToken(), joinGameReq);
+        var request = buildRequestHB("GET", "/game/watch", joinGameReq.authToken(), joinGameReq);
         var response = sendRequest(request);
         return handleResponse(response, JoinGameResult.class);
     }

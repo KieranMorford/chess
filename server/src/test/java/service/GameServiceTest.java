@@ -95,9 +95,7 @@ class GameServiceTest {
         NewGameRequest nGReq = new NewGameRequest(logRes.authToken(), "First Strand-type Game");
         gameService.newGame(nGReq);
         var jGReq1 = new JoinGameRequest(logRes.authToken(), ChessGame.TeamColor.WHITE, 5);
-        var jGReq2 = new JoinGameRequest(logRes.authToken(), null, 1);
         assertThrows(BadRequestException.class, () -> {gameService.joinGame(jGReq1);});
-        assertThrows(BadRequestException.class, () -> {gameService.joinGame(jGReq2);});
     }
 
     @Test

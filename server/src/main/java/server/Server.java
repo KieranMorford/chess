@@ -37,6 +37,7 @@ public class Server {
                 .get("/game", this::getGameList)
                 .post("/game", this::newGame)
                 .put("/game", this::joinGame)
+                .get("/game/watch", this::watchGame)
                 .delete("/db", this::delete);
         memoryDataAccess = new MemoryDataAccess();
         try {
@@ -142,20 +143,40 @@ public class Server {
             String authToken = ctx.header("authorization");
             String reqJson = ctx.body();
             var preJGReq = serializer.fromJson(reqJson, PreJoinRequest.class);
-//            if (preJGReq.gameID() == null || preJGReq.playerColor() == null) {
-//                throw new BadRequestException("Bad Request");
-//            }
-            if (preJGReq.gameID() == null) {
+            if (preJGReq.gameID() == null || preJGReq.playerColor() == null) {
                 throw new BadRequestException("Bad Request");
             }
             var jGReq = new JoinGameRequest(null, null,0);
-            if (preJGReq.playerColor() == null) {
-                jGReq = new JoinGameRequest(authToken, null, Integer.parseInt(preJGReq.gameID()));
-            } else if (preJGReq.playerColor().equals("WHITE")) {
+            if (preJGReq.playerColor().equals("WHITE")) {
                 jGReq = new JoinGameRequest(authToken, ChessGame.TeamColor.WHITE, Integer.parseInt(preJGReq.gameID()));
             } else if (preJGReq.playerColor().equals("BLACK")) {
                 jGReq = new JoinGameRequest(authToken, ChessGame.TeamColor.BLACK, Integer.parseInt(preJGReq.gameID()));
             }
+
+            gameServiceSQL.joinGame(jGReq);
+
+            ctx.result(serializer.toJson(null));
+        } catch (BadRequestException ex) {
+            reportError(serializer, ctx, ex, 400);
+        } catch (UnauthorizedException ex) {
+            reportError(serializer, ctx, ex, 401);
+        } catch (AlreadyTakenException ex) {
+            reportError(serializer, ctx, ex, 403);
+        } catch (DataAccessException ex) {
+            reportError(serializer, ctx, ex, 500);
+        }
+    }
+
+    private void watchGame(Context ctx) {
+        var serializer = new Gson();
+        try {
+            String authToken = ctx.header("authorization");
+            String reqJson = ctx.body();
+            var preJGReq = serializer.fromJson(reqJson, PreJoinRequest.class);
+            if (preJGReq.gameID() == null) {
+                throw new BadRequestException("Bad Request");
+            }
+            var jGReq = new JoinGameRequest(authToken, null, Integer.parseInt(preJGReq.gameID()));
 
             gameServiceSQL.joinGame(jGReq);
 
