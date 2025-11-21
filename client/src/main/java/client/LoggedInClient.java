@@ -7,6 +7,7 @@ import serverfacade.ServerFacade;
 import ui.DrawBoard;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -18,11 +19,12 @@ import static ui.EscapeSequences.SET_TEXT_ITALIC;
 public class LoggedInClient implements Client{
     private final ServerFacade server;
     private final String authToken;
-    private Map<Integer, GameData> gameList;
+    private final Map<Integer, GameData> gameList;
 
     public LoggedInClient(String serverUrl, String authToken) {
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
+        gameList = new HashMap<>();
     }
 
     @Override
@@ -85,7 +87,9 @@ public class LoggedInClient implements Client{
     }
 
     public String listGames() {
-        gameList.clear();
+        if (!gameList.isEmpty()) {
+            gameList.clear();
+        }
         GetGameListResult result = null;
         try {
             result = server.listGames(authToken);
@@ -93,6 +97,9 @@ public class LoggedInClient implements Client{
             return ex.getMessage();
         }
         var list = result.games();
+        if (list.isEmpty()) {
+            return "No games";
+        }
         StringBuilder sb = new StringBuilder();
         int i = 1;
         for (var game : list) {
@@ -126,6 +133,9 @@ public class LoggedInClient implements Client{
                 throw new Exception("Please enter an id number");
             }
             id = Integer.parseInt(params[0]);
+            if (gameList.get(id) == null) {
+                throw new Exception("No game with given id");
+            }
             if (Objects.equals(params[1], "white")) {
                 color = ChessGame.TeamColor.WHITE;
             } else if (Objects.equals(params[1], "black")) {
@@ -146,7 +156,7 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID> [WHITE|BLACK]");
         }
-        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard(), color);
+        return DrawBoard.render(server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game().getBoard(), color);
     }
 
     public String observeGame(String[] params) throws Exception {
@@ -158,8 +168,11 @@ public class LoggedInClient implements Client{
                 throw new Exception("Please enter an id number");
             }
             id = Integer.parseInt(params[0]);
+            if (gameList.get(id) == null) {
+                throw new Exception("No game with given id");
+            }
             try {
-                server.observeGame(new JoinGameRequest(authToken, null, id));
+                server.observeGame(new JoinGameRequest(authToken, null, gameList.get(id).gameID()));
             } catch (Exception ex) {
                 if (ex.getMessage().equals("HTTP 400: {\"message\":\"Error: No Game with given ID\"}")) {
                     return "No game with given id";
@@ -168,7 +181,7 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID>");
         }
-        return DrawBoard.render(server.listGames(authToken).games().get(id - 1).game().getBoard(), ChessGame.TeamColor.WHITE);
+        return DrawBoard.render(server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game().getBoard(), ChessGame.TeamColor.WHITE);
     }
 
     public String logout() {
