@@ -46,7 +46,7 @@ public class REPL {
                     result = "quit";
                 }
             }
-            if (result != null && result.length() > 50) {
+            if (result != null && result.length() > 200) {
                 GameClient gClient = null;
                 try {
                     gClient = new GameClient(serverUrl, client.getAuthToken() );
@@ -73,6 +73,8 @@ public class REPL {
             state = "[LOGGED_OUT]";
         } else if (client.getClass() == LoggedInClient.class) {
             state = "[LOGGED_IN]";
+        } else if (client.getClass() == GameClient.class) {
+            state = "[GAME]";
         }
         System.out.print("\n" + state + " >>> ");
     }

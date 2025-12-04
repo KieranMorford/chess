@@ -81,6 +81,12 @@ public class LoggedInClient implements Client{
             } catch (Exception ex) {
                 return ex.getMessage();
             }
+            try {
+                var result = server.listGames(authToken);
+                gameList.put(gameList.size() + 1, result.games().getLast());
+            } catch (Exception ex) {
+                return ex.getMessage();
+            }
             return "New Game Created!";
         }
         throw new Exception("Expected: <NAME>");

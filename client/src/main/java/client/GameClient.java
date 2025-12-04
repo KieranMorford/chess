@@ -16,7 +16,7 @@ public class GameClient implements Client{
     private final String authToken;
 
 
-    public GameClient(String serverUrl, String authToken, ) {
+    public GameClient(String serverUrl, String authToken) {
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
     }
