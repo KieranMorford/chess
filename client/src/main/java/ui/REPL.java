@@ -2,6 +2,7 @@ package ui;
 
 
 import client.Client;
+import client.GameClient;
 import client.LoggedInClient;
 import client.LoggedOutClient;
 
@@ -43,6 +44,20 @@ public class REPL {
                 nRepl.run();
                 if (nRepl.checkQuit()) {
                     result = "quit";
+                }
+            }
+            if (result != null && result.length() > 50) {
+                GameClient gClient = null;
+                try {
+                    gClient = new GameClient(serverUrl, client.getAuthToken() );
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
+                REPL nRepl = new REPL(gClient, serverUrl);
+                nRepl.run();
+                if (result.equals("")) {
+
                 }
             }
         }
