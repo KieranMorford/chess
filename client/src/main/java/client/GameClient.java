@@ -1,6 +1,8 @@
 package client;
 
+import chess.ChessGame;
 import serverfacade.ServerFacade;
+import ui.DrawBoard;
 
 import java.util.Arrays;
 
@@ -14,11 +16,14 @@ public class GameClient implements Client{
 
     private final ServerFacade server;
     private final String authToken;
+    private final ChessGame.TeamColor color;
+    private final ChessGame game;
 
-
-    public GameClient(String serverUrl, String authToken) {
+    public GameClient(String serverUrl, String authToken, ChessGame game, ChessGame.TeamColor color) {
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
+        this.color = color;
+        this.game = game;
     }
 
     @Override
@@ -39,8 +44,6 @@ public class GameClient implements Client{
             return ex.getMessage();
         }
     }
-
-
 
     @Override
     public String help() {
@@ -63,16 +66,18 @@ public class GameClient implements Client{
         return authToken;
     }
 
-    public String redrawBoard() {
-        return "";
+    public String redrawBoard() throws Exception {
+        return DrawBoard.render(game.getBoard(), color);
     }
 
     public String leaveGame() {
-        return "";
+
+        return "You left the game.";
     }
 
     public String forfeitGame() {
-        return "";
+        game.endGame();
+        return "You forfeited the game.";
     }
 
     public String makeMove(String[] params) {
@@ -81,5 +86,15 @@ public class GameClient implements Client{
 
     public String highlightMoves(String[] params) {
         return "";
+    }
+
+    @Override
+    public ChessGame.TeamColor getColor() {
+        return null;
+    }
+
+    @Override
+    public ChessGame getGame() {
+        return null;
     }
 }

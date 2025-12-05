@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import exceptions.RequestException;
 import requestresult.*;
 import serverfacade.ServerFacade;
@@ -83,5 +84,15 @@ public class LoggedOutClient implements Client {
     @Override
     public String getAuthToken() {
         return authToken;
+    }
+
+    @Override
+    public ChessGame.TeamColor getColor() {
+        return null;
+    }
+
+    @Override
+    public ChessGame getGame() {
+        return null;
     }
 }

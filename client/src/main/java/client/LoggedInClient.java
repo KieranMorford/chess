@@ -20,11 +20,15 @@ public class LoggedInClient implements Client{
     private final ServerFacade server;
     private final String authToken;
     private final Map<Integer, GameData> gameList;
+    private ChessGame.TeamColor color;
+    private ChessGame game;
 
     public LoggedInClient(String serverUrl, String authToken) {
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         gameList = new HashMap<>();
+        ChessGame.TeamColor color = null;
+        ChessGame game = null;
     }
 
     @Override
@@ -130,7 +134,6 @@ public class LoggedInClient implements Client{
     }
 
     public String playGame(String[] params) throws Exception {
-        ChessGame.TeamColor color = null;
         int id = 0;
         if (params.length == 2) {
             try {
@@ -139,6 +142,9 @@ public class LoggedInClient implements Client{
                 throw new Exception("Please enter an id number");
             }
             id = Integer.parseInt(params[0]);
+            if (gameList.get(id).game().isGameFinished()) {
+                throw new Exception("Game is finished");
+            }
             if (gameList.get(id) == null) {
                 throw new Exception("No game with given id");
             }
@@ -162,7 +168,8 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID> [WHITE|BLACK]");
         }
-        return DrawBoard.render(server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game().getBoard(), color);
+        this.game = server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game();
+        return DrawBoard.render(game.getBoard(), color);
     }
 
     public String observeGame(String[] params) throws Exception {
@@ -187,7 +194,9 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID>");
         }
-        return DrawBoard.render(server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game().getBoard(), ChessGame.TeamColor.WHITE);
+        color = ChessGame.TeamColor.WHITE;
+        this.game = server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game();
+        return DrawBoard.render(game.getBoard(), color);
     }
 
     public String logout() {
@@ -197,5 +206,15 @@ public class LoggedInClient implements Client{
             return ex.getMessage();
         }
         return "You have Successfully been Logged Out!";
+    }
+
+    @Override
+    public ChessGame.TeamColor getColor() {
+        return color;
+    }
+
+    @Override
+    public ChessGame getGame() {
+        return game;
     }
 }

@@ -15,10 +15,12 @@ public class ChessGame {
 
     ChessBoard board;
     TeamColor teamTurn;
+    boolean gameFinished;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
         board = new ChessBoard();
+        gameFinished = false;
         board.resetBoard();
     }
 
@@ -263,6 +265,14 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public void endGame() {
+        gameFinished = true;
+    }
+
+    public boolean isGameFinished() {
+        return gameFinished;
     }
 
     @Override

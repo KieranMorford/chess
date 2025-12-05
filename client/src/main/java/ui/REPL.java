@@ -46,17 +46,17 @@ public class REPL {
                     result = "quit";
                 }
             }
-            if (result != null && result.length() > 200) {
+            if (result != null && client.getClass() != GameClient.class && result.length() > 200) {
                 GameClient gClient = null;
                 try {
-                    gClient = new GameClient(serverUrl, client.getAuthToken() );
+                    gClient = new GameClient(serverUrl, client.getAuthToken(), client.getGame(), client.getColor());
                 } catch (Throwable e) {
                     var msg = e.toString();
                     System.out.print(msg);
                 }
                 REPL nRepl = new REPL(gClient, serverUrl);
                 nRepl.run();
-                if (result.equals("")) {
+                if (result.equals("You left the game.")) {
 
                 }
             }
