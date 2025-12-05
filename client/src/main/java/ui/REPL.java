@@ -46,7 +46,7 @@ public class REPL {
                     result = "quit";
                 }
             }
-            if (result != null && client.getClass() != GameClient.class && result.length() > 200) {
+            if (result != null && client.getClass() != GameClient.class && result.length() > 300 && !result.startsWith("Game ID:") && !result.startsWith("[38", 1)) {
                 GameClient gClient = null;
                 try {
                     gClient = new GameClient(serverUrl, client.getAuthToken(), client.getGame(), client.getId(), client.getColor());

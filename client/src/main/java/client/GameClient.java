@@ -2,9 +2,11 @@ package client;
 
 import chess.ChessGame;
 import chess.ChessPosition;
+import com.sun.nio.sctp.NotificationHandler;
 import requestresult.JoinGameRequest;
 import serverfacade.ServerFacade;
 import ui.DrawBoard;
+import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
@@ -14,7 +16,7 @@ import static ui.EscapeSequences.RESET_TEXT_ITALIC;
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
 import static ui.EscapeSequences.SET_TEXT_ITALIC;
 
-public class GameClient implements Client{
+public class GameClient implements Client {
 
     private final ServerFacade server;
     private final String authToken;
@@ -28,6 +30,11 @@ public class GameClient implements Client{
         this.color = color;
         this.game = game;
         this.id = id;
+    }
+
+    public void notify(ServerMessage notification) {
+        System.out.println(RED + notification.message());
+        printPrompt();
     }
 
     @Override
@@ -105,7 +112,13 @@ public class GameClient implements Client{
             row = Integer.parseInt(params[0].substring(1));
             char cCol = col.charAt(0);
             int nCol = cCol - 'a' + 1;
+            if (nCol < 1 || nCol > 8 || row < 1 || row > 8) {
+                throw new Exception("Please enter a valid board position");
+            }
             pos = new ChessPosition(row, nCol);
+            if (game.getBoard().getPiece(pos) == null) {
+                throw new Exception("No piece in selected spot");
+            }
         } else {
             throw new Exception("Expected: <COLROW>");
         }

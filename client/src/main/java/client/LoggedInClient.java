@@ -28,6 +28,7 @@ public class LoggedInClient implements Client{
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         gameList = new HashMap<>();
+        listGames();
         ChessGame.TeamColor color = null;
         ChessGame game = null;
         id = 0;

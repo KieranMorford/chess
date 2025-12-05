@@ -13,6 +13,7 @@ import io.javalin.http.Context;
 import requestresult.*;
 import service.GameService;
 import service.UserService;
+import server.WebSocketHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,9 +27,17 @@ public class Server {
     private final UserService userServiceSQL;
     private final GameService gameServiceM;
     private final GameService gameServiceSQL;
+    private final WebSocketHandler webSocketHandler;
 
 
     public Server() {
+        memoryDataAccess = new MemoryDataAccess();
+        try {
+            sqlDataAccess = new SQLDataAccess();
+        } catch (DataAccessException ex) {
+            throw new RuntimeException(ex);
+        }
+        this.webSocketHandler = new WebSocketHandler(sqlDataAccess);
         javalin = Javalin.create(config -> config.staticFiles.add("web"))
                 .post("/user", this::register)
                 .post("/session", this::login)
@@ -39,16 +48,10 @@ public class Server {
                 .get("/game/watch", this::watchGame)
                 .delete("/db", this::delete)
                 .ws("/ws", ws -> {
-                    ws.onConnect(this::connect);
-                    ws.onMessage(this::evalMessage);
-                    ws.onClose(this::close);
+                    ws.onConnect(webSocketHandler);
+                    ws.onMessage(webSocketHandler);
+                    ws.onClose(webSocketHandler);
                 });
-        memoryDataAccess = new MemoryDataAccess();
-        try {
-            sqlDataAccess = new SQLDataAccess();
-        } catch (DataAccessException ex) {
-            throw new RuntimeException(ex);
-        }
         userServiceM = new UserService(memoryDataAccess);
         userServiceSQL = new UserService(sqlDataAccess);
         gameServiceM = new GameService(memoryDataAccess);
