@@ -8,4 +8,5 @@ public interface Client {
     public String getAuthToken();
     public ChessGame.TeamColor getColor();
     public ChessGame getGame();
+    public int getId();
 }

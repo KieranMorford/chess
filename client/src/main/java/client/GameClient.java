@@ -1,6 +1,8 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessPosition;
+import requestresult.JoinGameRequest;
 import serverfacade.ServerFacade;
 import ui.DrawBoard;
 
@@ -18,12 +20,14 @@ public class GameClient implements Client{
     private final String authToken;
     private final ChessGame.TeamColor color;
     private final ChessGame game;
+    private final int id;
 
-    public GameClient(String serverUrl, String authToken, ChessGame game, ChessGame.TeamColor color) {
+    public GameClient(String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
         server = new ServerFacade(serverUrl);
         this.authToken = authToken;
         this.color = color;
         this.game = game;
+        this.id = id;
     }
 
     @Override
@@ -67,25 +71,45 @@ public class GameClient implements Client{
     }
 
     public String redrawBoard() throws Exception {
-        return DrawBoard.render(game.getBoard(), color);
+        return DrawBoard.render(game.getBoard(), color, null);
     }
 
     public String leaveGame() {
-
+//        server.leaveGame();
         return "You left the game.";
     }
 
     public String forfeitGame() {
         game.endGame();
+
         return "You forfeited the game.";
     }
 
     public String makeMove(String[] params) {
-        return "";
+
+        return "You made your move.";
     }
 
-    public String highlightMoves(String[] params) {
-        return "";
+    public String highlightMoves(String[] params) throws Exception {
+        String col = null;
+        int row = 0;
+        ChessPosition pos = null;
+        if (params.length == 1) {
+            try {
+                params[0].substring(0,1).matches("\\p{Alpha}+");
+                Integer.parseInt(params[0].substring(1));
+            } catch (NumberFormatException e) {
+                throw new Exception("Please enter a position in the format: a1");
+            }
+            col = params[0].substring(0,1);
+            row = Integer.parseInt(params[0].substring(1));
+            char cCol = col.charAt(0);
+            int nCol = cCol - 'a' + 1;
+            pos = new ChessPosition(row, nCol);
+        } else {
+            throw new Exception("Expected: <COLROW>");
+        }
+        return DrawBoard.render(game.getBoard(), color, pos);
     }
 
     @Override
@@ -96,5 +120,10 @@ public class GameClient implements Client{
     @Override
     public ChessGame getGame() {
         return null;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 }

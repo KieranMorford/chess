@@ -67,7 +67,6 @@ public class GameService {
                     dataAccess.getAuth(jGReq.authToken()).username(), oldGame.gameName(), oldGame.game());
         }
         dataAccess.updateGame(newGame);
-
     }
 
     public int generateGameId() {

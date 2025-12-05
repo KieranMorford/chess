@@ -95,4 +95,9 @@ public class LoggedOutClient implements Client {
     public ChessGame getGame() {
         return null;
     }
+
+    @Override
+    public int getId() {
+        return 0;
+    }
 }

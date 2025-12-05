@@ -37,7 +37,12 @@ public class Server {
                 .post("/game", this::newGame)
                 .put("/game", this::joinGame)
                 .get("/game/watch", this::watchGame)
-                .delete("/db", this::delete);
+                .delete("/db", this::delete)
+                .ws("/ws", ws -> {
+                    ws.onConnect(this::connect);
+                    ws.onMessage(this::evalMessage);
+                    ws.onClose(this::close);
+                });
         memoryDataAccess = new MemoryDataAccess();
         try {
             sqlDataAccess = new SQLDataAccess();

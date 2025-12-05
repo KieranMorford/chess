@@ -22,6 +22,7 @@ public class LoggedInClient implements Client{
     private final Map<Integer, GameData> gameList;
     private ChessGame.TeamColor color;
     private ChessGame game;
+    private int id;
 
     public LoggedInClient(String serverUrl, String authToken) {
         server = new ServerFacade(serverUrl);
@@ -29,6 +30,7 @@ public class LoggedInClient implements Client{
         gameList = new HashMap<>();
         ChessGame.TeamColor color = null;
         ChessGame game = null;
+        id = 0;
     }
 
     @Override
@@ -134,7 +136,6 @@ public class LoggedInClient implements Client{
     }
 
     public String playGame(String[] params) throws Exception {
-        int id = 0;
         if (params.length == 2) {
             try {
                 Integer.parseInt(params[0]);
@@ -169,11 +170,10 @@ public class LoggedInClient implements Client{
             throw new Exception("Expected: <ID> [WHITE|BLACK]");
         }
         this.game = server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game();
-        return DrawBoard.render(game.getBoard(), color);
+        return DrawBoard.render(game.getBoard(), color, null);
     }
 
     public String observeGame(String[] params) throws Exception {
-        int id = 0;
         if (params.length == 1) {
             try {
                 Integer.parseInt(params[0]);
@@ -196,7 +196,7 @@ public class LoggedInClient implements Client{
         }
         color = ChessGame.TeamColor.WHITE;
         this.game = server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game();
-        return DrawBoard.render(game.getBoard(), color);
+        return DrawBoard.render(game.getBoard(), color, null);
     }
 
     public String logout() {
@@ -216,5 +216,10 @@ public class LoggedInClient implements Client{
     @Override
     public ChessGame getGame() {
         return game;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 }

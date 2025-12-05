@@ -49,7 +49,7 @@ public class REPL {
             if (result != null && client.getClass() != GameClient.class && result.length() > 200) {
                 GameClient gClient = null;
                 try {
-                    gClient = new GameClient(serverUrl, client.getAuthToken(), client.getGame(), client.getColor());
+                    gClient = new GameClient(serverUrl, client.getAuthToken(), client.getGame(), client.getId(), client.getColor());
                 } catch (Throwable e) {
                     var msg = e.toString();
                     System.out.print(msg);
