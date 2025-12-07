@@ -5,6 +5,8 @@ import client.Client;
 import client.GameClient;
 import client.LoggedInClient;
 import client.LoggedOutClient;
+import com.google.gson.Gson;
+import com.google.gson.JsonSerializer;
 
 import java.util.Scanner;
 
@@ -16,6 +18,11 @@ public class REPL {
     public REPL(Client client, String serverUrl) {
         this.client = client;
         this.serverUrl = serverUrl;
+    }
+
+    public void printToConsole(String message) {
+        var serializer = new Gson();
+        System.out.println(message);
     }
 
     public void run() {
@@ -48,7 +55,7 @@ public class REPL {
             if (result != null && client.getClass() != GameClient.class && result.length() > 300 && !result.startsWith("Game ID:") && !result.startsWith("[38", 1)) {
                 GameClient gClient = null;
                 try {
-                    gClient = new GameClient(serverUrl, client.getAuthToken(), client.getGame(), client.getId(), client.getColor());
+                    gClient = new GameClient(this, serverUrl, client.getAuthToken(), client.getGame(), client.getId(), client.getColor());
                 } catch (Throwable e) {
                     var msg = e.toString();
                     System.out.print(msg);

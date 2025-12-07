@@ -10,6 +10,7 @@ import serverfacade.NotificationHandler;
 import serverfacade.ServerFacade;
 import serverfacade.WebSocketFacade;
 import ui.DrawBoard;
+import ui.REPL;
 import websocket.commands.ConnectCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
@@ -24,6 +25,7 @@ import static ui.EscapeSequences.SET_TEXT_ITALIC;
 
 public class GameClient implements Client, NotificationHandler {
 
+    private final REPL repl;
     private final ServerFacade server;
     private final WebSocketFacade  webSocketFacade;
     private final String authToken;
@@ -31,7 +33,8 @@ public class GameClient implements Client, NotificationHandler {
     private ChessGame game;
     private final int id;
 
-    public GameClient(String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
+    public GameClient(REPL repl, String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
+        this.repl = repl;
         server = new ServerFacade(serverUrl);
         webSocketFacade = new WebSocketFacade(serverUrl, this);
         this.authToken = authToken;
@@ -47,14 +50,23 @@ public class GameClient implements Client, NotificationHandler {
         var serializer = new Gson();
         if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN) && this.game.isGameFinished()) {
 
-        } else if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
+        } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
-            System.out.println(moveData.getUsername() + " made a move from " + moveData.getMove().getStartPosition().toString()
-                    + " to " + moveData.getMove().getEndPosition().toString()
-                    + ", and was promoted to " + moveData.getMove().getPromotionPiece().toString() + "."
-                    + DrawBoard.render(moveData.getGame().game().getBoard(), moveData.getColor(), null));
+            var str = new StringBuilder();
+            str.append(DrawBoard.render(moveData.getGame().game().getBoard(), moveData.getColor(), null));
+            if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
+                str.append("\n").append(moveData.getUsername()).append(" made a move from ")
+                        .append(moveData.getMove().getStartPosition().toString()).append(" to ")
+                        .append(moveData.getMove().getEndPosition().toString());
+                if (moveData.getMove().getPromotionPiece() != null) {
+                    str.append(", and was promoted to ").append(moveData.getMove().getPromotionPiece().toString()).append(".");
+                } else {
+                    str.append(".");
+                }
+            }
+            repl.printToConsole(str.toString());
         } else {
-            System.out.println(notification.getMessage());
+            repl.printToConsole(notification.getMessage());
         }
     }
 

@@ -1,5 +1,6 @@
 package server;
 
+import chess.ChessGame;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
@@ -66,9 +67,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void connect(int gameId, String username, ConnectCommand command) throws IOException {
+    public void connect(int gameId, String username, ConnectCommand command) throws IOException, BadRequestException, DataAccessException {
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player.", command.getCommandType());
         connections.broadcast(gameId, message);
+        var serializer = new Gson();
+        var game = dataAccess.getGame(gameId);
+        ChessGame.TeamColor color = null;
+        if (username.equals(game.whiteUsername())) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if  (username.equals(game.blackUsername())) {
+            color = ChessGame.TeamColor.BLACK;
+        }
+        ServerMessage lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, null, null, color)), command.getCommandType());
+        connections.broadcast(gameId, lGMessage);
     }
 
     private void makeMove(int gameId, String username, MakeMoveCommand command) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
@@ -78,9 +89,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
         ServerMessage message = null;
         if (move.getPromotionPiece() != null) {
-            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+            message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
         } else {
-            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+            message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
         }
         game.game().makeMove(move);
         dataAccess.updateGame(game);
