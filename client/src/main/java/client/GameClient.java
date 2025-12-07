@@ -2,23 +2,23 @@ package client;
 
 import chess.ChessGame;
 import chess.ChessPosition;
-import com.sun.nio.sctp.NotificationHandler;
-import requestresult.JoinGameRequest;
+import serverfacade.NotificationHandler;
 import serverfacade.ServerFacade;
+import serverfacade.WebSocketFacade;
 import ui.DrawBoard;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
 
-import static ui.EscapeSequences.*;
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.RESET_TEXT_ITALIC;
 import static ui.EscapeSequences.SET_TEXT_COLOR_BLUE;
 import static ui.EscapeSequences.SET_TEXT_ITALIC;
 
-public class GameClient implements Client {
+public class GameClient implements Client, NotificationHandler {
 
     private final ServerFacade server;
+    private final WebSocketFacade  webSocketFacade;
     private final String authToken;
     private final ChessGame.TeamColor color;
     private final ChessGame game;
@@ -26,15 +26,16 @@ public class GameClient implements Client {
 
     public GameClient(String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
         server = new ServerFacade(serverUrl);
+        webSocketFacade = new WebSocketFacade(serverUrl, this);
         this.authToken = authToken;
         this.color = color;
         this.game = game;
         this.id = id;
     }
 
+    @Override
     public void notify(ServerMessage notification) {
-        System.out.println(RED + notification.message());
-        printPrompt();
+        System.out.println(RESET_TEXT_COLOR + notification.getMessage());
     }
 
     @Override

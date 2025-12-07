@@ -1,6 +1,7 @@
 package client;
 
 import chess.ChessGame;
+import serverfacade.NotificationHandler;
 
 public interface Client {
     public String eval(String input);

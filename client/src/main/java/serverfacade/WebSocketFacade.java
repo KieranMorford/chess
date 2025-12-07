@@ -2,10 +2,8 @@ package serverfacade;
 
 import com.google.gson.Gson;
 import exceptions.ResponseException;
-import jakarta.websocket.ContainerProvider;
-import jakarta.websocket.Session;
-import org.eclipse.jetty.websocket.api.WebSocketContainer;
-import org.eclipse.jetty.websocket.core.internal.MessageHandler;
+
+import jakarta.websocket.*;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -30,12 +28,12 @@ public class WebSocketFacade{
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
+                    ServerMessage notification = new Gson().fromJson(message, ServerMessage.class);
                     notificationHandler.notify(notification);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
-            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
+            throw new ResponseException(ex.getMessage());
         }
     }
 
