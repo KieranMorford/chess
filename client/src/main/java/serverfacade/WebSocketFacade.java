@@ -42,7 +42,6 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    // TODO: Implement command types
     public void SendCommand(UserGameCommand command) throws ResponseException {
         try{
             var serializer = new Gson();

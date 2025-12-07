@@ -1,11 +1,15 @@
 package client;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
 import chess.ChessPosition;
 import serverfacade.NotificationHandler;
 import serverfacade.ServerFacade;
 import serverfacade.WebSocketFacade;
 import ui.DrawBoard;
+import websocket.commands.ConnectCommand;
+import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -22,7 +26,7 @@ public class GameClient implements Client, NotificationHandler {
     private final WebSocketFacade  webSocketFacade;
     private final String authToken;
     private final ChessGame.TeamColor color;
-    private final ChessGame game;
+    private ChessGame game;
     private final int id;
 
     public GameClient(String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
@@ -33,16 +37,16 @@ public class GameClient implements Client, NotificationHandler {
         this.game = game;
         this.id = id;
 
-        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, this.authToken, this.id));
+        this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, color));
     }
 
     @Override
     public void notify(ServerMessage notification) {
-        if (UserGameCommand.CommandType.RESIGN.equals(notification.getMessage()) && !this.game.isGameFinished()) {
-            System.out.println("YOU WIN!");
+        if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN) && this.game.isGameFinished()) {
+
+        } else {
+            System.out.println(RESET_TEXT_COLOR + notification.getMessage());
         }
-        System.out.println("THIS IS A WEBSOCKET! YAY!");
-        System.out.println(RESET_TEXT_COLOR + notification.getMessage());
     }
 
     @Override
@@ -70,8 +74,8 @@ public class GameClient implements Client, NotificationHandler {
                 + SET_TEXT_ITALIC + " - display the board" + RESET_TEXT_ITALIC + "\n"
                 + SET_TEXT_COLOR_BLUE + "- leave" + RESET_TEXT_COLOR
                 + SET_TEXT_ITALIC + " - leave the game" + RESET_TEXT_ITALIC + "\n"
-                + SET_TEXT_COLOR_BLUE + "- move <COLROW> <COLROW>" + RESET_TEXT_COLOR
-                + SET_TEXT_ITALIC + " - move a piece (ex: move b2 b4)" + RESET_TEXT_ITALIC + "\n"
+                + SET_TEXT_COLOR_BLUE + "- move <COLROW> <COLROW> (<PROMOTION> if valid)" + RESET_TEXT_COLOR
+                + SET_TEXT_ITALIC + " - move a piece (ex: move b7 b8 queen)" + RESET_TEXT_ITALIC + "\n"
                 + SET_TEXT_COLOR_BLUE + "- resign" + RESET_TEXT_COLOR
                 + SET_TEXT_ITALIC + " - forfeit the game" + RESET_TEXT_ITALIC + "\n"
                 + SET_TEXT_COLOR_BLUE + "- highlight <COLROW>" + RESET_TEXT_COLOR
@@ -97,16 +101,55 @@ public class GameClient implements Client, NotificationHandler {
     public String forfeitGame() {
         this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
         game.endGame();
-
         return "You forfeited the game.";
     }
 
-    public String makeMove(String[] params) {
+    public String makeMove(String[] params) throws Exception {
         if (game.isGameFinished()) {
             return "The game has already ended.";
         }
-        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, this.authToken, this.id));
-        return "You made your move.";
+        String col1 = null;
+        int row1 = 0;
+        String col2 = null;
+        int row2 = 0;
+        ChessPosition pos1 = null;
+        ChessPosition pos2 = null;
+        ChessPiece.PieceType promotion = null;
+        ChessMove move = null;
+        if (params.length == 2 || params.length == 3) {
+            try {
+                params[0].substring(0,1).matches("\\p{Alpha}+");
+                Integer.parseInt(params[0].substring(1));
+                params[1].substring(0,1).matches("\\p{Alpha}+");
+                Integer.parseInt(params[1].substring(1));
+            } catch (NumberFormatException e) {
+                throw new Exception("Please enter a position in the format: a1");
+            }
+            col1 = params[0].substring(0,1);
+            row1 = Integer.parseInt(params[0].substring(1,2));
+            char cCol1 = col1.charAt(0);
+            int nCol1 = cCol1 - 'a' + 1;
+            col2 = params[1].substring(0,1);
+            row2 = Integer.parseInt(params[1].substring(1,2));
+            char cCol2 = col2.charAt(0);
+            int nCol2 = cCol2 - 'a' + 1;
+            if (nCol1 < 1 || nCol1 > 8 || row1 < 1 || row1 > 8 || nCol2 < 1 || nCol2 > 8 || row2 < 1 || row2 > 8) {
+                throw new Exception("Please enter valid board positions");
+            }
+            if (params.length == 3) {
+                promotion = ChessPiece.PieceType.valueOf(params[2]);
+            }
+            pos1 = new ChessPosition(row1, nCol1);
+            pos2 = new ChessPosition(row2, nCol2);
+            move = new ChessMove(pos1, pos2, promotion);
+            if (!game.getBoard().getPiece(pos1).pieceMoves(game.getBoard(), pos1).contains(move)) {
+                throw new Exception("Invalid move.");
+            }
+        } else {
+            throw new Exception("Expected: <COLROW> <COLROW> (<PROMOTION> if valid)");
+        }
+        this.webSocketFacade.SendCommand(new MakeMoveCommand(this.authToken, this.id, move));
+        return DrawBoard.render(game.getBoard(), color, null);
     }
 
     public String highlightMoves(String[] params) throws Exception {

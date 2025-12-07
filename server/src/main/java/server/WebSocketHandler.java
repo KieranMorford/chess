@@ -1,5 +1,6 @@
 package server;
 
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
@@ -13,8 +14,11 @@ import io.javalin.websocket.WsMessageContext;
 import io.javalin.websocket.WsMessageHandler;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.commands.ConnectCommand;
+import websocket.commands.GameCommand;
 import websocket.commands.MakeMoveCommand;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 
@@ -45,7 +49,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             String username = dataAccess.getAuth(command.getAuthToken()).username();
             connections.add(gameId, session);
             switch (command.getCommandType()) {
-                case CONNECT -> connect(gameId, username, (UserGameCommand) command);
+                case CONNECT -> {
+                    ConnectCommand cCommand = serializer.fromJson(ctx.message(), ConnectCommand.class);
+                    connect(gameId, username, (ConnectCommand) cCommand);
+                }
                 case MAKE_MOVE -> {
                     MakeMoveCommand mCommand = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
                     makeMove(gameId, username, (MakeMoveCommand) mCommand);
@@ -58,12 +65,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void connect(int gameId, String username, UserGameCommand command) throws IOException {
-        connections.broadcast(gameId, username + " joined the game as " + command.get + ".");
+    public void connect(int gameId, String username, ConnectCommand command) throws IOException {
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player.", command.getCommandType());
+        connections.broadcast(gameId, message);
     }
 
-    private void makeMove(int gameId, String username, MakeMoveCommand mCommand) throws IOException {
-        connections.broadcast(gameId, "GAME JOINED");
+    private void makeMove(int gameId, String username, MakeMoveCommand command) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
+        var move = command.getMove();
+        var game = dataAccess.getGame(gameId);
+        ServerMessage message = null;
+        if (move.getPromotionPiece() != null) {
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " made a move from " + move.getStartPosition().toString()
+                    + " to " + move.getEndPosition().toString() + ", and was promoted to " + move.getPromotionPiece().toString() + "."
+                    + DrawBoard.render(game.game().getBoard()), command.getCommandType());
+        } else {
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " made a move from " + move.getStartPosition().toString()
+                    + " to " + move.getEndPosition().toString() + ".", command.getCommandType());
+        }
+        game.game().makeMove(move);
+        dataAccess.updateGame(game);
+        connections.broadcast(gameId, message);
     }
 
     private void leaveGame(int gameId, String username, UserGameCommand command) throws IOException, BadRequestException, DataAccessException {
@@ -73,11 +94,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } else if (game.blackUsername().equals(username)) {
             dataAccess.updateGame(new GameData(gameId, game.whiteUsername(), null, game.gameName(), game.game()));
         }
-        connections.broadcast(gameId, username + " left the game.");
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " left the game.", command.getCommandType());
+        connections.broadcast(gameId, message);
     }
 
     private void resign(int gameId, String username, UserGameCommand command) throws IOException {
-        connections.broadcast(gameId, "RESIGN");
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " forfeited the game. You win!", command.getCommandType());
+        connections.broadcast(gameId, message);
     }
 
     @Override
