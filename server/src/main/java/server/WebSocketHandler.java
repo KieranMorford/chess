@@ -4,6 +4,7 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
+import envelopes.MakeMoveData;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
 import io.javalin.websocket.WsCloseContext;
@@ -71,16 +72,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(int gameId, String username, MakeMoveCommand command) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
+        var serializer = new Gson();
         var move = command.getMove();
         var game = dataAccess.getGame(gameId);
+        var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
         ServerMessage message = null;
         if (move.getPromotionPiece() != null) {
-            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " made a move from " + move.getStartPosition().toString()
-                    + " to " + move.getEndPosition().toString() + ", and was promoted to " + move.getPromotionPiece().toString() + "."
-                    + DrawBoard.render(game.game().getBoard()), command.getCommandType());
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
         } else {
-            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " made a move from " + move.getStartPosition().toString()
-                    + " to " + move.getEndPosition().toString() + ".", command.getCommandType());
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
         }
         game.game().makeMove(move);
         dataAccess.updateGame(game);

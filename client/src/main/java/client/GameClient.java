@@ -4,6 +4,8 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+import com.google.gson.Gson;
+import envelopes.MakeMoveData;
 import serverfacade.NotificationHandler;
 import serverfacade.ServerFacade;
 import serverfacade.WebSocketFacade;
@@ -42,10 +44,17 @@ public class GameClient implements Client, NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
+        var serializer = new Gson();
         if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN) && this.game.isGameFinished()) {
 
+        } else if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
+            var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
+            System.out.println(moveData.getUsername() + " made a move from " + moveData.getMove().getStartPosition().toString()
+                    + " to " + moveData.getMove().getEndPosition().toString()
+                    + ", and was promoted to " + moveData.getMove().getPromotionPiece().toString() + "."
+                    + DrawBoard.render(moveData.getGame().game().getBoard(), moveData.getColor(), null));
         } else {
-            System.out.println(RESET_TEXT_COLOR + notification.getMessage());
+            System.out.println(notification.getMessage());
         }
     }
 
@@ -149,7 +158,8 @@ public class GameClient implements Client, NotificationHandler {
             throw new Exception("Expected: <COLROW> <COLROW> (<PROMOTION> if valid)");
         }
         this.webSocketFacade.SendCommand(new MakeMoveCommand(this.authToken, this.id, move));
-        return DrawBoard.render(game.getBoard(), color, null);
+
+        return "";
     }
 
     public String highlightMoves(String[] params) throws Exception {
