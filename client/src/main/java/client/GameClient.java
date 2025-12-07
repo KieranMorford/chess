@@ -6,6 +6,7 @@ import serverfacade.NotificationHandler;
 import serverfacade.ServerFacade;
 import serverfacade.WebSocketFacade;
 import ui.DrawBoard;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
@@ -31,10 +32,16 @@ public class GameClient implements Client, NotificationHandler {
         this.color = color;
         this.game = game;
         this.id = id;
+
+        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.CONNECT, this.authToken, this.id));
     }
 
     @Override
     public void notify(ServerMessage notification) {
+        if (UserGameCommand.CommandType.RESIGN.equals(notification.getMessage()) && !this.game.isGameFinished()) {
+            System.out.println("YOU WIN!");
+        }
+        System.out.println("THIS IS A WEBSOCKET! YAY!");
         System.out.println(RESET_TEXT_COLOR + notification.getMessage());
     }
 
@@ -83,18 +90,22 @@ public class GameClient implements Client, NotificationHandler {
     }
 
     public String leaveGame() {
-//        server.leaveGame();
+        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, this.authToken, this.id));
         return "You left the game.";
     }
 
     public String forfeitGame() {
+        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
         game.endGame();
 
         return "You forfeited the game.";
     }
 
     public String makeMove(String[] params) {
-
+        if (game.isGameFinished()) {
+            return "The game has already ended.";
+        }
+        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, this.authToken, this.id));
         return "You made your move.";
     }
 

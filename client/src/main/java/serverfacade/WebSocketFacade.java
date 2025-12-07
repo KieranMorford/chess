@@ -4,13 +4,14 @@ import com.google.gson.Gson;
 import exceptions.ResponseException;
 
 import jakarta.websocket.*;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-public class WebSocketFacade{
+public class WebSocketFacade extends Endpoint {
 
     Session session;
     NotificationHandler notificationHandler;
@@ -33,6 +34,20 @@ public class WebSocketFacade{
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
+            throw new ResponseException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
+
+    // TODO: Implement command types
+    public void SendCommand(UserGameCommand command) throws ResponseException {
+        try{
+            var serializer = new Gson();
+            this.session.getBasicRemote().sendText(serializer.toJson(command));
+        } catch (IOException ex) {
             throw new ResponseException(ex.getMessage());
         }
     }

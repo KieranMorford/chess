@@ -16,14 +16,7 @@ public class ConnectionManager {
         connections.remove(id);
     }
 
-//    public void broadcast(Session excludeSession, Notification notification) throws IOException {
-//        String msg = notification.toString();
-//        for (Session c : connections.values()) {
-//            if (c.isOpen()) {
-//                if (!c.equals(excludeSession)) {
-//                    c.getRemote().sendString(msg);
-//                }
-//            }
-//        }
-//    }
+    public void broadcast(int gameId, String notification) throws IOException {
+        connections.get(gameId).getRemote().sendString(notification);
+    }
 }

@@ -21,10 +21,9 @@ public class REPL {
     public void run() {
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("quit") && !result.equals("You have Successfully been Logged Out!")) {
+        while (!result.equals("quit") && !result.equals("You have Successfully been Logged Out!") && !result.equals("You left the game.")) {
             printPrompt();
             String line = scanner.nextLine();
-
             try {
                 result = client.eval(line);
                 System.out.print(result);
@@ -56,9 +55,6 @@ public class REPL {
                 }
                 REPL nRepl = new REPL(gClient, serverUrl);
                 nRepl.run();
-                if (result.equals("You left the game.")) {
-
-                }
             }
         }
         if (result.equals("quit")) {

@@ -209,6 +209,7 @@ public class SQLDataAccess implements DataAccess {
         }
     }
 
+
     @Override
     public void updateGame(GameData gameData) throws DataAccessException, BadRequestException {
         var serializer = new Gson();
