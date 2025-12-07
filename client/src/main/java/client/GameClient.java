@@ -53,7 +53,6 @@ public class GameClient implements Client, NotificationHandler {
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
             var str = new StringBuilder();
-            str.append(DrawBoard.render(moveData.getGame().game().getBoard(), moveData.getColor(), null));
             if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
                 str.append("\n").append(moveData.getUsername()).append(" made a move from ")
                         .append(moveData.getMove().getStartPosition().toString()).append(" to ")
@@ -64,6 +63,8 @@ public class GameClient implements Client, NotificationHandler {
                     str.append(".");
                 }
             }
+            var board = DrawBoard.render(moveData.getGame().game().getBoard(), moveData.getColor(), null);
+            repl.printToConsole(board);
             repl.printToConsole(str.toString());
         } else {
             repl.printToConsole(notification.getMessage());

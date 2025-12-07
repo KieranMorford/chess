@@ -170,8 +170,7 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID> [WHITE|BLACK]");
         }
-        this.game = server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game();
-        return DrawBoard.render(game.getBoard(), color, null);
+        return "";
     }
 
     public String observeGame(String[] params) throws Exception {
@@ -195,9 +194,7 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID>");
         }
-        color = ChessGame.TeamColor.WHITE;
-        this.game = server.listGames(authToken).games().get(gameList.get(id).gameID() - 1).game();
-        return DrawBoard.render(game.getBoard(), color, null);
+        return "";
     }
 
     public String logout() {
