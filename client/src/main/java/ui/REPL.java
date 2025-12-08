@@ -22,7 +22,7 @@ public class REPL {
 
     public void printToConsole(String message) {
         var serializer = new Gson();
-        System.out.println(message);
+        System.out.print(message);
     }
 
     public void run() {
@@ -52,7 +52,7 @@ public class REPL {
                     result = "quit";
                 }
             }
-            if (result != null && client.getClass() != GameClient.class && result.length() > 300 && !result.startsWith("Game ID:") && !result.startsWith("[38", 1)) {
+            if (result != null && result.equals("Game joined!")) {
                 GameClient gClient = null;
                 try {
                     gClient = new GameClient(this, serverUrl, client.getAuthToken(), client.getGame(), client.getId(), client.getColor());
@@ -63,11 +63,11 @@ public class REPL {
                 REPL nRepl = new REPL(gClient, serverUrl);
                 nRepl.run();
             }
+//            System.out.println();
         }
         if (result.equals("quit")) {
             quit = true;
         }
-        System.out.println();
     }
 
     private void printPrompt() {

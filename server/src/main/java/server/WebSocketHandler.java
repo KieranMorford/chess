@@ -41,7 +41,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     @Override
-    public void handleMessage(WsMessageContext ctx) {
+    public void handleMessage(WsMessageContext ctx) throws IOException {
         var serializer = new Gson();
         int gameId = -1;
         Session session = ctx.session;
@@ -49,7 +49,16 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
             gameId = command.getGameID();
             String username = dataAccess.getAuth(command.getAuthToken()).username();
-            connections.add(gameId, session);
+            System.out.println("Saving to connections, Game ID: " + gameId);
+            ChessGame.TeamColor color = null;
+            var blackUsername = dataAccess.getGame(gameId).blackUsername();
+            if (blackUsername != null && blackUsername.equals(username)) {
+                color = ChessGame.TeamColor.BLACK;
+            } else {
+                color = ChessGame.TeamColor.WHITE;
+            }
+            System.out.println("Saving to connections, for color: " + color);
+            connections.add(gameId, session, color);
             switch (command.getCommandType()) {
                 case CONNECT -> {
                     ConnectCommand cCommand = serializer.fromJson(ctx.message(), ConnectCommand.class);
@@ -62,8 +71,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case LEAVE -> leaveGame(gameId, username, (UserGameCommand) command);
                 case RESIGN -> resign(gameId, username, (UserGameCommand) command);
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        } catch (InvalidMoveException ex) {
+            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -85,17 +96,21 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void makeMove(int gameId, String username, MakeMoveCommand command) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
         var serializer = new Gson();
         var move = command.getMove();
-        var game = dataAccess.getGame(gameId);
-        var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
-        ServerMessage message = null;
-        if (move.getPromotionPiece() != null) {
-            message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+        if (dataAccess.getGame(gameId).game().getBoard().getPiece(move.getStartPosition()) != null) {
+            var game = dataAccess.getGame(gameId);
+            var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
+            ServerMessage message = null;
+            game.game().makeMove(move);
+            if (move.getPromotionPiece() != null) {
+                message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+            } else {
+                message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+            }
+            dataAccess.updateGame(game);
+            connections.broadcast(gameId, message);
         } else {
-            message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"));
         }
-        game.game().makeMove(move);
-        dataAccess.updateGame(game);
-        connections.broadcast(gameId, message);
     }
 
     private void leaveGame(int gameId, String username, UserGameCommand command) throws IOException, BadRequestException, DataAccessException {

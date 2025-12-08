@@ -170,7 +170,8 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID> [WHITE|BLACK]");
         }
-        return "";
+        game = gameList.get(id).game();
+        return "Game joined!";
     }
 
     public String observeGame(String[] params) throws Exception {
@@ -194,7 +195,8 @@ public class LoggedInClient implements Client{
         } else {
             throw new Exception("Expected: <ID>");
         }
-        return "";
+        game = gameList.get(id).game();
+        return "Game joined!";
     }
 
     public String logout() {

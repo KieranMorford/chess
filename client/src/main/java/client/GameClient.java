@@ -54,7 +54,7 @@ public class GameClient implements Client, NotificationHandler {
             var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
             var str = new StringBuilder();
             if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
-                str.append("\n").append(moveData.getUsername()).append(" made a move from ")
+                str.append(moveData.getUsername()).append(" made a move from ")
                         .append(moveData.getMove().getStartPosition().toString()).append(" to ")
                         .append(moveData.getMove().getEndPosition().toString());
                 if (moveData.getMove().getPromotionPiece() != null) {
@@ -63,9 +63,12 @@ public class GameClient implements Client, NotificationHandler {
                     str.append(".");
                 }
             }
-            var board = DrawBoard.render(moveData.getGame().game().getBoard(), moveData.getColor(), null);
+            game = moveData.getGame().game();
+            var board = DrawBoard.render(moveData.getGame().game().getBoard(), color, null);
+            repl.printToConsole("\n");
             repl.printToConsole(board);
             repl.printToConsole(str.toString());
+            repl.printToConsole("[GAME] >>> ");
         } else {
             repl.printToConsole(notification.getMessage());
         }
@@ -164,7 +167,7 @@ public class GameClient implements Client, NotificationHandler {
             pos1 = new ChessPosition(row1, nCol1);
             pos2 = new ChessPosition(row2, nCol2);
             move = new ChessMove(pos1, pos2, promotion);
-            if (!game.getBoard().getPiece(pos1).pieceMoves(game.getBoard(), pos1).contains(move)) {
+            if (game.getBoard().getPiece(pos1) == null || !game.getBoard().getPiece(pos1).pieceMoves(game.getBoard(), pos1).contains(move)) {
                 throw new Exception("Invalid move.");
             }
         } else {
