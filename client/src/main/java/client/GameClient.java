@@ -51,6 +51,7 @@ public class GameClient implements Client, NotificationHandler {
         if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN) && this.game.isGameFinished()) {
 
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
+            game = notification.getGame();
             var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
             var str = new StringBuilder();
             if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
@@ -63,7 +64,6 @@ public class GameClient implements Client, NotificationHandler {
                     str.append(".");
                 }
             }
-            game = moveData.getGame().game();
             var board = DrawBoard.render(moveData.getGame().game().getBoard(), color, null);
             repl.printToConsole("\n");
             repl.printToConsole(board);

@@ -196,7 +196,7 @@ public class LoggedInClient implements Client{
             throw new Exception("Expected: <ID>");
         }
         game = gameList.get(id).game();
-        return "Game joined!";
+        return "Observing game!";
     }
 
     public String logout() {

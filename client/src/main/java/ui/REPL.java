@@ -63,6 +63,17 @@ public class REPL {
                 REPL nRepl = new REPL(gClient, serverUrl);
                 nRepl.run();
             }
+            if (result != null && result.equals("Observing game!")) {
+                GameClient gClient = null;
+                try {
+                    gClient = new GameClient(this, serverUrl, client.getAuthToken(), client.getGame(), client.getId(), null);
+                } catch (Throwable e) {
+                    var msg = e.toString();
+                    System.out.print(msg);
+                }
+                REPL nRepl = new REPL(gClient, serverUrl);
+                nRepl.run();
+            }
 //            System.out.println();
         }
         if (result.equals("quit")) {
