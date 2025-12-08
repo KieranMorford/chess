@@ -79,18 +79,31 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     public void connect(int gameId, String username, ConnectCommand command) throws IOException, BadRequestException, DataAccessException {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player.", command.getCommandType());
-        connections.broadcast(gameId, message);
+//        ServerMessage message = null;
+//        if (command.getColor() != null) {
+//            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player.", command.getCommandType());
+//        } else {
+//            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " is observing the game.", command.getCommandType());
+//
+//        }
+//        connections.broadcast(gameId, message);
         var serializer = new Gson();
         var game = dataAccess.getGame(gameId);
         ChessGame.TeamColor color = null;
+        ChessGame.TeamColor iColor = null;
         if (username.equals(game.whiteUsername())) {
             color = ChessGame.TeamColor.WHITE;
         } else if  (username.equals(game.blackUsername())) {
             color = ChessGame.TeamColor.BLACK;
         }
-        ServerMessage lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, null, null, color)), command.getCommandType());
-        connections.broadcast(gameId, lGMessage);
+        ServerMessage lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
+        lGMessage.setGame(game.game());
+        if (username.equals(game.whiteUsername())) {
+            iColor = ChessGame.TeamColor.BLACK;
+        } else if  (username.equals(game.blackUsername())) {
+            iColor = ChessGame.TeamColor.WHITE;
+        }
+        connections.broadcast(gameId, lGMessage, color);
     }
 
     private void makeMove(int gameId, String username, MakeMoveCommand command) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {

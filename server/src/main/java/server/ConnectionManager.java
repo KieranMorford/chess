@@ -30,13 +30,26 @@ public class ConnectionManager {
         var serializer = new Gson();
         var serializedMessage = serializer.toJson(message);
         var holder = connections.get(gameId);
-        System.out.println("broadcasting " + serializedMessage + " to " + gameId);
         var bSession = holder.getBSession();
         var wSession = holder.getWSession();
         if(bSession != null){
             bSession.getRemote().sendString(serializedMessage);
         }
         if(wSession != null){
+            wSession.getRemote().sendString(serializedMessage);
+        }
+    }
+
+    public void broadcast(int gameId, ServerMessage message, ChessGame.TeamColor color) throws IOException {
+        var serializer = new Gson();
+        var serializedMessage = serializer.toJson(message);
+        var holder = connections.get(gameId);
+        var bSession = holder.getBSession();
+        var wSession = holder.getWSession();
+        if(bSession != null && color.equals(ChessGame.TeamColor.BLACK)){
+            bSession.getRemote().sendString(serializedMessage);
+        }
+        if(wSession != null && color.equals(ChessGame.TeamColor.WHITE)){
             wSession.getRemote().sendString(serializedMessage);
         }
     }

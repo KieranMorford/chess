@@ -1,5 +1,6 @@
 package websocket.messages;
 
+import chess.ChessGame;
 import websocket.commands.UserGameCommand;
 
 import java.util.Objects;
@@ -14,6 +15,7 @@ public class ServerMessage {
     ServerMessageType serverMessageType;
     String message;
     UserGameCommand.CommandType commandType;
+    ChessGame game;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -37,6 +39,14 @@ public class ServerMessage {
         this.serverMessageType = type;
         this.message = message;
         this.commandType = commandType;
+    }
+
+    public void setGame(ChessGame game) {
+        this.game = game;
+    }
+
+    public ChessGame getGame() {
+        return this.game;
     }
 
     public UserGameCommand.CommandType getCommandType() {
