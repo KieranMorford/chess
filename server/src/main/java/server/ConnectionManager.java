@@ -19,7 +19,6 @@ public class ConnectionManager {
             connections.put(id,  new ConcurrentHashMap<>());
             holder = connections.get(id);
         }
-        System.out.println("adding session for  " + id);
         holder.put(name, session);
         connections.put(id, holder);
     }

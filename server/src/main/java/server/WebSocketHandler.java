@@ -99,21 +99,36 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(int gameId, String username, MakeMoveCommand command, Session session) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
-        if (dataAccess.getGame(gameId).game().isGameFinished()) {
+        boolean check = dataAccess.getGame(gameId).game().isGameFinished();
+        if (!dataAccess.getGame(gameId).game().isGameFinished()) {
             var serializer = new Gson();
-             var move = command.getMove();
+            var move = command.getMove();
             if (dataAccess.getGame(gameId).game().getBoard().getPiece(move.getStartPosition()) != null) {
                 var game = dataAccess.getGame(gameId);
                 var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
+                ServerMessage lGMessage = null;
                 ServerMessage message = null;
                 game.game().makeMove(move);
-                if (move.getPromotionPiece() != null) {
-                    message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+                var str = new StringBuilder();
+                int s = move.getStartPosition().getColumn();
+                int e = move.getEndPosition().getColumn();
+                char[] alpha = "abcdefgh".toCharArray();
+                var sCol = Character.toString(alpha[s]);
+                var eCol = Character.toString(alpha[e]);
+                str.append(username).append(" made a move from ").append(sCol).append(move.getStartPosition().getRow())
+                        .append(" to ").append(eCol).append(move.getEndPosition().getRow());
+                if (move.getPromotionPiece() == null) {
+                    lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
+                    str.append(".");
                 } else {
-                    message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+                    lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
+                    str.append(", and was promoted to ").append(move.getPromotionPiece().toString()).append(".");
                 }
+                lGMessage.setGame(game.game());
                 dataAccess.updateGame(game);
-                connections.broadcastAll(gameId, message);
+                connections.broadcastAll(gameId, lGMessage);
+                message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, str.toString(), command.getCommandType());
+                connections.broadcastRest(gameId, message, username);
             } else {
                 connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"), username);
             }
