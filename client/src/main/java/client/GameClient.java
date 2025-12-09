@@ -29,9 +29,10 @@ public class GameClient implements Client, NotificationHandler {
     private final ServerFacade server;
     private final WebSocketFacade  webSocketFacade;
     private final String authToken;
-    private final ChessGame.TeamColor color;
+    private ChessGame.TeamColor color;
     private ChessGame game;
     private final int id;
+    private final boolean player;
 
     public GameClient(REPL repl, String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
         this.repl = repl;
@@ -41,13 +42,28 @@ public class GameClient implements Client, NotificationHandler {
         this.color = color;
         this.game = game;
         this.id = id;
+        this.player = true;
 
         this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, color));
+    }
+
+    public GameClient(REPL repl, String serverUrl, String authToken, ChessGame game, int id) {
+        this.repl = repl;
+        server = new ServerFacade(serverUrl);
+        webSocketFacade = new WebSocketFacade(serverUrl, this);
+        this.authToken = authToken;
+        this.color = ChessGame.TeamColor.WHITE;
+        this.game = game;
+        this.id = id;
+        this.player = false;
+
+        this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, null));
     }
 
     @Override
     public void notify(ServerMessage notification) {
         var serializer = new Gson();
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION))
         if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN) && this.game.isGameFinished()) {
 
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
@@ -68,6 +84,9 @@ public class GameClient implements Client, NotificationHandler {
             repl.printToConsole("\n");
             repl.printToConsole(board);
             repl.printToConsole(str.toString());
+            if(!str.isEmpty()) {
+                repl.printToConsole("\n");
+            }
             repl.printToConsole("[GAME] >>> ");
         } else {
             repl.printToConsole(notification.getMessage());

@@ -17,8 +17,19 @@ public class ConnectionManager {
             System.out.println("Creating new holder");
             holder = new SessionHolder();
         }
-        System.out.println("adding seesion for  " + id + " " + color);
+        System.out.println("adding session for  " + id + " " + color);
         holder.setSession(session, color);
+        connections.put(id, holder);
+    }
+
+    public void add(int id, Session session, String name) {
+        var holder = connections.get(id);
+        if (holder == null) {
+            System.out.println("Creating new holder");
+            holder = new SessionHolder();
+        }
+        System.out.println("adding session for  " + id);
+        holder.setSession(session, name);
         connections.put(id, holder);
     }
 
@@ -46,11 +57,41 @@ public class ConnectionManager {
         var holder = connections.get(gameId);
         var bSession = holder.getBSession();
         var wSession = holder.getWSession();
-        if(bSession != null && color.equals(ChessGame.TeamColor.BLACK)){
+        if (bSession != null && color.equals(ChessGame.TeamColor.BLACK)) {
             bSession.getRemote().sendString(serializedMessage);
         }
-        if(wSession != null && color.equals(ChessGame.TeamColor.WHITE)){
+        if (wSession != null && color.equals(ChessGame.TeamColor.WHITE)) {
             wSession.getRemote().sendString(serializedMessage);
+        }
+    }
+
+    public void broadcast(int gameId, String name, ServerMessage message, ChessGame.TeamColor color) throws IOException {
+        var serializer = new Gson();
+        var serializedMessage = serializer.toJson(message);
+        var holder = connections.get(gameId);
+        var bSession = holder.getBSession();
+        var wSession = holder.getWSession();
+        var oSessions = holder.getOSessions(name);
+        if (bSession != null && color.equals(ChessGame.TeamColor.BLACK)) {
+            bSession.getRemote().sendString(serializedMessage);
+        }
+        if (wSession != null && color.equals(ChessGame.TeamColor.WHITE)) {
+            wSession.getRemote().sendString(serializedMessage);
+        }
+        if (oSessions != null) {
+            for (var sessions : oSessions.values()) {
+                sessions.getRemote().sendString(serializedMessage);
+            }
+        }
+    }
+
+    public void broadcast(int gameId, ServerMessage message, String name) throws IOException {
+        var serializer = new Gson();
+        var serializedMessage = serializer.toJson(message);
+        var holder = connections.get(gameId);
+        var oSession = holder.getOSession(name);
+        if (oSession != null) {
+            oSession.getRemote().sendString(serializedMessage);
         }
     }
 }

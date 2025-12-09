@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class ConnectCommand extends UserGameCommand {
 
-    private ChessGame.TeamColor color;
+    private final ChessGame.TeamColor color;
 
     public ConnectCommand(String authToken, Integer gameID, ChessGame.TeamColor color) {
         super(CommandType.CONNECT, authToken, gameID);

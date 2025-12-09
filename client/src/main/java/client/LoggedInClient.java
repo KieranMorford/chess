@@ -144,11 +144,11 @@ public class LoggedInClient implements Client{
                 throw new Exception("Please enter an id number");
             }
             id = Integer.parseInt(params[0]);
-            if (gameList.get(id).game().isGameFinished()) {
-                throw new Exception("Game is finished");
-            }
             if (gameList.get(id) == null) {
                 throw new Exception("No game with given id");
+            }
+            if (gameList.get(id).game().isGameFinished()) {
+                throw new Exception("Game is finished");
             }
             if (Objects.equals(params[1], "white")) {
                 color = ChessGame.TeamColor.WHITE;

@@ -66,7 +66,7 @@ public class REPL {
             if (result != null && result.equals("Observing game!")) {
                 GameClient gClient = null;
                 try {
-                    gClient = new GameClient(this, serverUrl, client.getAuthToken(), client.getGame(), client.getId(), null);
+                    gClient = new GameClient(this, serverUrl, client.getAuthToken(), client.getGame(), client.getId());
                 } catch (Throwable e) {
                     var msg = e.toString();
                     System.out.print(msg);

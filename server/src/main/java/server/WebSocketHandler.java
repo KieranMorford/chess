@@ -57,16 +57,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else {
                 color = ChessGame.TeamColor.WHITE;
             }
-            System.out.println("Saving to connections, for color: " + color);
-            connections.add(gameId, session, color);
+            if (color != null) {
+                System.out.println("Saving to connections, for color: " + color);
+                connections.add(gameId, session, color);
+            } else {
+                connections.add(gameId, session, username);
+            }
             switch (command.getCommandType()) {
                 case CONNECT -> {
                     ConnectCommand cCommand = serializer.fromJson(ctx.message(), ConnectCommand.class);
-                    connect(gameId, username, (ConnectCommand) cCommand);
+                    connect(gameId, username, (ConnectCommand) cCommand, session);
                 }
                 case MAKE_MOVE -> {
                     MakeMoveCommand mCommand = serializer.fromJson(ctx.message(), MakeMoveCommand.class);
-                    makeMove(gameId, username, (MakeMoveCommand) mCommand);
+                    makeMove(gameId, username, (MakeMoveCommand) mCommand, session);
                 }
                 case LEAVE -> leaveGame(gameId, username, (UserGameCommand) command);
                 case RESIGN -> resign(gameId, username, (UserGameCommand) command);
@@ -78,51 +82,62 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void connect(int gameId, String username, ConnectCommand command) throws IOException, BadRequestException, DataAccessException {
-//        ServerMessage message = null;
-//        if (command.getColor() != null) {
-//            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player.", command.getCommandType());
-//        } else {
-//            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " is observing the game.", command.getCommandType());
-//
-//        }
-//        connections.broadcast(gameId, message);
+    public void connect(int gameId, String username, ConnectCommand command, Session session) throws IOException, BadRequestException, DataAccessException {
+        ServerMessage message = null;
+        if (command.getColor() == null) {
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " is observing the game.", command.getCommandType());
+        } else {
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player." + "\n[GAME] >>> ", command.getCommandType());
+        }
         var serializer = new Gson();
         var game = dataAccess.getGame(gameId);
         ChessGame.TeamColor color = null;
         ChessGame.TeamColor iColor = null;
-        if (username.equals(game.whiteUsername())) {
+        if (game.whiteUsername() != null && username.equals(game.whiteUsername())) {
             color = ChessGame.TeamColor.WHITE;
-        } else if  (username.equals(game.blackUsername())) {
+        } else if  (game.blackUsername() != null && username.equals(game.blackUsername())) {
             color = ChessGame.TeamColor.BLACK;
         }
         ServerMessage lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
         lGMessage.setGame(game.game());
-        if (username.equals(game.whiteUsername())) {
+        if (color == ChessGame.TeamColor.WHITE) {
             iColor = ChessGame.TeamColor.BLACK;
-        } else if  (username.equals(game.blackUsername())) {
+            connections.broadcast(gameId, username, message, iColor);
+        } else if (color == ChessGame.TeamColor.BLACK) {
             iColor = ChessGame.TeamColor.WHITE;
+            connections.broadcast(gameId, username, message, iColor);
+        } else {
+            connections.broadcast(gameId, message, ChessGame.TeamColor.WHITE);
+            connections.broadcast(gameId, username, message, ChessGame.TeamColor.BLACK);
         }
-        connections.broadcast(gameId, lGMessage, color);
+        if (color != null) {
+            connections.broadcast(gameId, lGMessage, color);
+        } else {
+            connections.broadcast(gameId, lGMessage, username);
+        }
     }
 
-    private void makeMove(int gameId, String username, MakeMoveCommand command) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
-        var serializer = new Gson();
-        var move = command.getMove();
-        if (dataAccess.getGame(gameId).game().getBoard().getPiece(move.getStartPosition()) != null) {
-            var game = dataAccess.getGame(gameId);
-            var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
-            ServerMessage message = null;
-            game.game().makeMove(move);
-            if (move.getPromotionPiece() != null) {
-                message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+    private void makeMove(int gameId, String username, MakeMoveCommand command, Session session) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
+        if (dataAccess.getGame(gameId).game().isGameFinished()) {
+            var serializer = new Gson();
+             var move = command.getMove();
+            if (dataAccess.getGame(gameId).game().getBoard().getPiece(move.getStartPosition()) != null) {
+                var game = dataAccess.getGame(gameId);
+                var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
+                ServerMessage message = null;
+                game.game().makeMove(move);
+                if (move.getPromotionPiece() != null) {
+                    message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+                } else {
+                    message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+                }
+                dataAccess.updateGame(game);
+                connections.broadcast(gameId, message);
             } else {
-                message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
+                connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"));
             }
-            dataAccess.updateGame(game);
-            connections.broadcast(gameId, message);
         } else {
-            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"));
+            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"));
         }
     }
 
@@ -133,13 +148,38 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } else if (game.blackUsername().equals(username)) {
             dataAccess.updateGame(new GameData(gameId, game.whiteUsername(), null, game.gameName(), game.game()));
         }
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " left the game.", command.getCommandType());
-        connections.broadcast(gameId, message);
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " left the game.\n[GAME] >>> ", command.getCommandType());
+        ChessGame.TeamColor color = null;
+        ChessGame.TeamColor iColor = null;
+        if (username.equals(game.whiteUsername())) {
+            color = ChessGame.TeamColor.WHITE;
+        } else if  (username.equals(game.blackUsername())) {
+            color = ChessGame.TeamColor.BLACK;
+        }
+        if (color == ChessGame.TeamColor.WHITE) {
+            iColor = ChessGame.TeamColor.BLACK;
+            connections.broadcast(gameId, message, iColor);
+        } else if  (color == ChessGame.TeamColor.BLACK) {
+            iColor = ChessGame.TeamColor.WHITE;
+            connections.broadcast(gameId, message, iColor);
+        } else {
+            connections.broadcast(gameId, message);
+        }
     }
 
-    private void resign(int gameId, String username, UserGameCommand command) throws IOException {
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " forfeited the game. You win!", command.getCommandType());
-        connections.broadcast(gameId, message);
+    private void resign(int gameId, String username, UserGameCommand command) throws IOException, BadRequestException, DataAccessException {
+        if (dataAccess.getGame(gameId).game().isGameFinished()) {
+            String winner = "Nobody";
+            if (dataAccess.getGame(gameId).whiteUsername() != null && dataAccess.getGame(gameId).whiteUsername().equals(username)) {
+                winner = dataAccess.getGame(gameId).blackUsername();
+            } else if (dataAccess.getGame(gameId).blackUsername() != null && dataAccess.getGame(gameId).blackUsername().equals(username)) {
+                winner = dataAccess.getGame(gameId).whiteUsername();
+            }
+            ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " forfeited the game." + winner + " wins!\n[GAME] >>> ", command.getCommandType());
+            connections.broadcast(gameId, message);
+        } else {
+            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"));
+        }
     }
 
     @Override
