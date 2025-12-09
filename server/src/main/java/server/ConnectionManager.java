@@ -2,6 +2,7 @@ package server;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
+import exceptions.UnauthorizedException;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.ServerMessage;
 
@@ -21,6 +22,11 @@ public class ConnectionManager {
         System.out.println("adding session for  " + id);
         holder.put(name, session);
         connections.put(id, holder);
+    }
+
+    public void remove(int id, Session session) {
+        var holder = connections.get(id);
+        holder.remove(session);
     }
 
     public void remove(int id) {

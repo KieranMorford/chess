@@ -16,6 +16,7 @@ public class ServerMessage {
     String message;
     UserGameCommand.CommandType commandType;
     ChessGame game;
+    String errorMessage;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -43,6 +44,10 @@ public class ServerMessage {
 
     public void setGame(ChessGame game) {
         this.game = game;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public ChessGame getGame() {

@@ -64,7 +64,20 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case RESIGN -> resign(gameId, username, (UserGameCommand) command);
             }
         } catch (InvalidMoveException ex) {
-            connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"), username);
+            var message = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            message.setErrorMessage("Invalid Move!");
+            connections.broadcastOne(gameId, message, username);
+        } catch (BadRequestException ex) {
+            var message = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            message.setErrorMessage("Bad Request!");
+            connections.broadcastOne(gameId, message, username);
+        } catch (UnauthorizedException ex) {
+            var message = new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+            message.setErrorMessage("Unauthorized!");
+            username = "HORRIBLENOGOODVERYBAD";
+            connections.add(gameId, session, username);
+            connections.broadcastOne(gameId, message, username);
+            connections.remove(gameId, session);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
