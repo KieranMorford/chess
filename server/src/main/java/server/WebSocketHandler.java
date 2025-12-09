@@ -45,24 +45,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var serializer = new Gson();
         int gameId = -1;
         Session session = ctx.session;
+        String username = null;
         try {
             UserGameCommand command = serializer.fromJson(ctx.message(), UserGameCommand.class);
             gameId = command.getGameID();
-            String username = dataAccess.getAuth(command.getAuthToken()).username();
-            System.out.println("Saving to connections, Game ID: " + gameId);
-            ChessGame.TeamColor color = null;
-            var blackUsername = dataAccess.getGame(gameId).blackUsername();
-            if (blackUsername != null && blackUsername.equals(username)) {
-                color = ChessGame.TeamColor.BLACK;
-            } else {
-                color = ChessGame.TeamColor.WHITE;
-            }
-            if (color != null) {
-                System.out.println("Saving to connections, for color: " + color);
-                connections.add(gameId, session, color);
-            } else {
-                connections.add(gameId, session, username);
-            }
+            username = dataAccess.getAuth(command.getAuthToken()).username();
+            connections.add(gameId, session, username);
             switch (command.getCommandType()) {
                 case CONNECT -> {
                     ConnectCommand cCommand = serializer.fromJson(ctx.message(), ConnectCommand.class);
@@ -76,7 +64,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 case RESIGN -> resign(gameId, username, (UserGameCommand) command);
             }
         } catch (InvalidMoveException ex) {
-            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"));
+            connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"), username);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -91,30 +79,10 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
         var serializer = new Gson();
         var game = dataAccess.getGame(gameId);
-        ChessGame.TeamColor color = null;
-        ChessGame.TeamColor iColor = null;
-        if (game.whiteUsername() != null && username.equals(game.whiteUsername())) {
-            color = ChessGame.TeamColor.WHITE;
-        } else if  (game.blackUsername() != null && username.equals(game.blackUsername())) {
-            color = ChessGame.TeamColor.BLACK;
-        }
         ServerMessage lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
         lGMessage.setGame(game.game());
-        if (color == ChessGame.TeamColor.WHITE) {
-            iColor = ChessGame.TeamColor.BLACK;
-            connections.broadcast(gameId, username, message, iColor);
-        } else if (color == ChessGame.TeamColor.BLACK) {
-            iColor = ChessGame.TeamColor.WHITE;
-            connections.broadcast(gameId, username, message, iColor);
-        } else {
-            connections.broadcast(gameId, message, ChessGame.TeamColor.WHITE);
-            connections.broadcast(gameId, username, message, ChessGame.TeamColor.BLACK);
-        }
-        if (color != null) {
-            connections.broadcast(gameId, lGMessage, color);
-        } else {
-            connections.broadcast(gameId, lGMessage, username);
-        }
+        connections.broadcastRest(gameId, message, username);
+        connections.broadcastOne(gameId, lGMessage, username);
     }
 
     private void makeMove(int gameId, String username, MakeMoveCommand command, Session session) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
@@ -132,12 +100,12 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                     message = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, serializer.toJson(new MakeMoveData(game, move, username, color)), command.getCommandType());
                 }
                 dataAccess.updateGame(game);
-                connections.broadcast(gameId, message);
+                connections.broadcastAll(gameId, message);
             } else {
-                connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"));
+                connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"), username);
             }
         } else {
-            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"));
+            connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"), username);
         }
     }
 
@@ -149,22 +117,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             dataAccess.updateGame(new GameData(gameId, game.whiteUsername(), null, game.gameName(), game.game()));
         }
         ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " left the game.\n[GAME] >>> ", command.getCommandType());
-        ChessGame.TeamColor color = null;
-        ChessGame.TeamColor iColor = null;
-        if (username.equals(game.whiteUsername())) {
-            color = ChessGame.TeamColor.WHITE;
-        } else if  (username.equals(game.blackUsername())) {
-            color = ChessGame.TeamColor.BLACK;
-        }
-        if (color == ChessGame.TeamColor.WHITE) {
-            iColor = ChessGame.TeamColor.BLACK;
-            connections.broadcast(gameId, message, iColor);
-        } else if  (color == ChessGame.TeamColor.BLACK) {
-            iColor = ChessGame.TeamColor.WHITE;
-            connections.broadcast(gameId, message, iColor);
-        } else {
-            connections.broadcast(gameId, message);
-        }
+        connections.broadcastRest(gameId, message, username);
     }
 
     private void resign(int gameId, String username, UserGameCommand command) throws IOException, BadRequestException, DataAccessException {
@@ -176,9 +129,9 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 winner = dataAccess.getGame(gameId).whiteUsername();
             }
             ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " forfeited the game." + winner + " wins!\n[GAME] >>> ", command.getCommandType());
-            connections.broadcast(gameId, message);
+            connections.broadcastRest(gameId, message, username);
         } else {
-            connections.broadcast(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"));
+            connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"), username);
         }
     }
 
