@@ -42,7 +42,7 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void SendCommand(UserGameCommand command) throws ResponseException {
+    public void sendCommand(UserGameCommand command) throws ResponseException {
         try{
             var serializer = new Gson();
             this.session.getBasicRemote().sendText(serializer.toJson(command));

@@ -41,7 +41,7 @@ public class GameClient implements Client, NotificationHandler {
         this.game = game;
         this.id = id;
 
-        this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, color));
+        this.webSocketFacade.sendCommand(new ConnectCommand(this.authToken, this.id, color));
     }
 
     public GameClient(REPL repl, String serverUrl, String authToken, ChessGame game, int id) {
@@ -53,7 +53,7 @@ public class GameClient implements Client, NotificationHandler {
         this.game = game;
         this.id = id;
 
-        this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, null));
+        this.webSocketFacade.sendCommand(new ConnectCommand(this.authToken, this.id, null));
     }
 
     @Override
@@ -127,12 +127,12 @@ public class GameClient implements Client, NotificationHandler {
     }
 
     public String leaveGame() {
-        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, this.authToken, this.id));
+        this.webSocketFacade.sendCommand(new UserGameCommand(UserGameCommand.CommandType.LEAVE, this.authToken, this.id));
         return "You left the game.";
     }
 
     public String forfeitGame() {
-        this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
+        this.webSocketFacade.sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
 //        game.endGame();
         return "You forfeited the game.";
     }
@@ -181,7 +181,7 @@ public class GameClient implements Client, NotificationHandler {
         } else {
             throw new Exception("Expected: <COLROW> <COLROW> (<PROMOTION> if valid)");
         }
-        this.webSocketFacade.SendCommand(new MakeMoveCommand(this.authToken, this.id, move));
+        this.webSocketFacade.sendCommand(new MakeMoveCommand(this.authToken, this.id, move));
 
         return "";
     }
