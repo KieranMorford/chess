@@ -141,10 +141,14 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, str.toString(), command.getCommandType());
                 connections.broadcastRest(gameId, message, username);
             } else {
-                connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Invalid move!"), username);
+                var eMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+                eMessage.setErrorMessage("Invalid Move!");
+                connections.broadcastOne(gameId, eMessage, username);
             }
         } else {
-            connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"), username);
+            var eMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
+            eMessage.setErrorMessage("Game is already over!");
+            connections.broadcastOne(gameId, eMessage, username);
         }
     }
 
@@ -160,7 +164,13 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void resign(int gameId, String username, UserGameCommand command) throws IOException, BadRequestException, DataAccessException {
-        if (dataAccess.getGame(gameId).game().isGameFinished()) {
+        if (!dataAccess.getGame(gameId).game().isGameFinished()) {
+            var game = dataAccess.getGame(gameId).game();
+            game.endGame();
+            var name = dataAccess.getGame(gameId).gameName();
+            var wName = dataAccess.getGame(gameId).whiteUsername();
+            var bName = dataAccess.getGame(gameId).blackUsername();
+            dataAccess.updateGame(new GameData(gameId, wName, bName, name, game));
             String winner = "Nobody";
             if (dataAccess.getGame(gameId).whiteUsername() != null && dataAccess.getGame(gameId).whiteUsername().equals(username)) {
                 winner = dataAccess.getGame(gameId).blackUsername();
@@ -168,7 +178,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 winner = dataAccess.getGame(gameId).whiteUsername();
             }
             ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " forfeited the game." + winner + " wins!\n[GAME] >>> ", command.getCommandType());
-            connections.broadcastRest(gameId, message, username);
+            connections.broadcastAll(gameId, message);
         } else {
             connections.broadcastOne(gameId, new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Game is already over!"), username);
         }

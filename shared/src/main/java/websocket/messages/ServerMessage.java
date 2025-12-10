@@ -50,6 +50,10 @@ public class ServerMessage {
         this.errorMessage = errorMessage;
     }
 
+    public String getErrorMessage() {
+        return this.errorMessage;
+    }
+
     public ChessGame getGame() {
         return this.game;
     }

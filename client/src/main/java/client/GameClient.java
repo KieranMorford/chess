@@ -63,13 +63,17 @@ public class GameClient implements Client, NotificationHandler {
     @Override
     public void notify(ServerMessage notification) {
         var serializer = new Gson();
-        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION))
-        if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN) && this.game.isGameFinished()) {
-
+//        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION))
+        if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
+            if (!this.game.isGameFinished()) {
+                repl.printToConsole("You have forfeited the game!");
+            }
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             game = notification.getGame();
             var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
+            var color = moveData.getColor();
             var str = new StringBuilder();
+            repl.printToConsole(DrawBoard.render(game.getBoard(), color, null));
             if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
                 str.append(moveData.getUsername()).append(" made a move from ")
                         .append(moveData.getMove().getStartPosition().toString()).append(" to ")
@@ -88,6 +92,9 @@ public class GameClient implements Client, NotificationHandler {
                 repl.printToConsole("\n");
             }
             repl.printToConsole("[GAME] >>> ");
+        } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
+            repl.printToConsole(notification.getErrorMessage());
+            repl.printToConsole("\n[GAME] >>> ");
         } else {
             repl.printToConsole(notification.getMessage());
         }
@@ -144,7 +151,7 @@ public class GameClient implements Client, NotificationHandler {
 
     public String forfeitGame() {
         this.webSocketFacade.SendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
-        game.endGame();
+//        game.endGame();
         return "You forfeited the game.";
     }
 
