@@ -82,7 +82,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         }
     }
 
-    public void connect(int gameId, String username, ConnectCommand command, Session session) throws IOException, BadRequestException, DataAccessException {
+    public void connect(int gameId, String username, ConnectCommand command, Session session)
+            throws IOException, BadRequestException, DataAccessException {
         ServerMessage message = null;
         if (command.getColor() == null) {
             message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
