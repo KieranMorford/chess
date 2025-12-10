@@ -85,9 +85,11 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void connect(int gameId, String username, ConnectCommand command, Session session) throws IOException, BadRequestException, DataAccessException {
         ServerMessage message = null;
         if (command.getColor() == null) {
-            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " is observing the game.", command.getCommandType());
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                    username + " is observing the game.", command.getCommandType());
         } else {
-            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " joined the game as the " + command.getColor().toString() + " player." + "\n[GAME] >>> ", command.getCommandType());
+            message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                    username + " joined the game as the " + command.getColor().toString() + " player." + "\n[GAME] >>> ", command.getCommandType());
         }
         var serializer = new Gson();
         var game = dataAccess.getGame(gameId);
@@ -98,7 +100,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         connections.broadcastOne(gameId, lGMessage, username);
     }
 
-    private void makeMove(int gameId, String username, MakeMoveCommand command, Session session) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
+    private void makeMove(int gameId, String username, MakeMoveCommand command, Session session)
+            throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
         if (!dataAccess.getGame(gameId).game().isGameFinished()) {
             var serializer = new Gson();
             var move = command.getMove();
@@ -162,7 +165,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         } else if (game.blackUsername() != null && game.blackUsername().equals(username)) {
             dataAccess.updateGame(new GameData(gameId, game.whiteUsername(), null, game.gameName(), game.game()));
         }
-        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " left the game.\n[GAME] >>> ", command.getCommandType());
+        ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                username + " left the game.\n[GAME] >>> ", command.getCommandType());
         connections.remove(gameId, username);
         connections.broadcastRest(gameId, message, username);
     }
@@ -187,7 +191,8 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
             } else if (dataAccess.getGame(gameId).blackUsername() != null && dataAccess.getGame(gameId).blackUsername().equals(username)) {
                 winner = dataAccess.getGame(gameId).whiteUsername();
             }
-            ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, username + " forfeited the game." + winner + " wins!\n[GAME] >>> ", command.getCommandType());
+            ServerMessage message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                    username + " forfeited the game." + winner + " wins!\n[GAME] >>> ", command.getCommandType());
             connections.broadcastAll(gameId, message);
         } else {
             var eMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
