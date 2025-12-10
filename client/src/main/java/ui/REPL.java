@@ -21,7 +21,6 @@ public class REPL {
     }
 
     public void printToConsole(String message) {
-        var serializer = new Gson();
         System.out.print(message);
     }
 

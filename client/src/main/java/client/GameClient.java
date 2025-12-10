@@ -16,6 +16,7 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.util.Arrays;
+import java.util.Scanner;
 
 import static ui.EscapeSequences.RESET_TEXT_COLOR;
 import static ui.EscapeSequences.RESET_TEXT_ITALIC;
@@ -58,18 +59,16 @@ public class GameClient implements Client, NotificationHandler {
 
     @Override
     public void notify(ServerMessage notification) {
-        var serializer = new Gson();
         if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
             repl.printToConsole(notification.getErrorMessage());
             repl.printToConsole("\n[GAME] >>> ");
         } else if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
             if (!this.game.isGameFinished()) {
-                repl.printToConsole("You have forfeited the game!");
+                repl.printToConsole("You have forfeited the game!\n[GAME] >>> ");
             }
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             game = notification.getGame();
-            var color = notification.getColor();
-            var board = DrawBoard.render(notification.getGame().getBoard(), color, null);
+            var board = DrawBoard.render(notification.getGame(), this.color, null);
             repl.printToConsole("\n");
             repl.printToConsole(board);
             if(notification.getMessage() != null) {
@@ -123,7 +122,7 @@ public class GameClient implements Client, NotificationHandler {
     }
 
     public String redrawBoard() throws Exception {
-        return DrawBoard.render(game.getBoard(), color, null);
+        return DrawBoard.render(game, color, null);
     }
 
     public String leaveGame() {
@@ -132,9 +131,12 @@ public class GameClient implements Client, NotificationHandler {
     }
 
     public String forfeitGame() {
-        this.webSocketFacade.sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
-//        game.endGame();
-        return "You forfeited the game.";
+        repl.printToConsole("Are you sure you want to forfeit the game? \ny/n: ");
+        Scanner scanner = new Scanner(System.in);
+        if (scanner.next().equals("y")) {
+            this.webSocketFacade.sendCommand(new UserGameCommand(UserGameCommand.CommandType.RESIGN, this.authToken, this.id));
+        }
+        return "";
     }
 
     public String makeMove(String[] params) throws Exception {
@@ -170,7 +172,17 @@ public class GameClient implements Client, NotificationHandler {
                 throw new Exception("Please enter valid board positions");
             }
             if (params.length == 3) {
-                promotion = ChessPiece.PieceType.valueOf(params[2]);
+                if (params[2].equalsIgnoreCase("knight")) {
+                    promotion = ChessPiece.PieceType.KNIGHT;
+                } else if (params[2].equalsIgnoreCase("queen")) {
+                    promotion = ChessPiece.PieceType.QUEEN;
+                }  else if (params[2].equalsIgnoreCase("bishop")) {
+                    promotion = ChessPiece.PieceType.BISHOP;
+                }  else if (params[2].equalsIgnoreCase("rook")) {
+                    promotion = ChessPiece.PieceType.ROOK;
+                }   else {
+                    throw new Exception("Please enter a valid promotion.");
+                }
             }
             pos1 = new ChessPosition(row1, nCol1);
             pos2 = new ChessPosition(row2, nCol2);
@@ -211,7 +223,7 @@ public class GameClient implements Client, NotificationHandler {
         } else {
             throw new Exception("Expected: <COLROW>");
         }
-        return DrawBoard.render(game.getBoard(), color, pos);
+        return DrawBoard.render(game, color, pos);
     }
 
     @Override

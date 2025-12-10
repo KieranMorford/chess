@@ -85,18 +85,19 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     public void connect(int gameId, String username, ConnectCommand command, Session session)
             throws IOException, BadRequestException, DataAccessException {
         ServerMessage message = null;
-        if (command.getColor() == null) {
+        var color = command.getColor();
+        if (color == null) {
             message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    username + " is observing the game.", command.getCommandType());
+                    username + " is observing the game.\n[Game] >>> ", command.getCommandType());
+            color = ChessGame.TeamColor.WHITE;
         } else {
             message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                     username + " joined the game as the " + command.getColor().toString() + " player." + "\n[GAME] >>> ", command.getCommandType());
         }
-        var serializer = new Gson();
         var game = dataAccess.getGame(gameId);
         ServerMessage lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
         lGMessage.setGame(game.game());
-        lGMessage.setColor(command.getColor());
+        lGMessage.setColor(color);
         connections.broadcastRest(gameId, message, username);
         connections.broadcastOne(gameId, lGMessage, username);
     }
@@ -104,7 +105,6 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     private void makeMove(int gameId, String username, MakeMoveCommand command, Session session)
             throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
         if (!dataAccess.getGame(gameId).game().isGameFinished()) {
-            var serializer = new Gson();
             var move = command.getMove();
             var game = dataAccess.getGame(gameId);
             var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
@@ -147,6 +147,26 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 connections.broadcastAll(gameId, lGMessage);
                 message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, str.toString(), command.getCommandType());
                 connections.broadcastRest(gameId, message, username);
+                ChessGame.TeamColor checkColor = null;
+                String lUser = null;
+                if(color == ChessGame.TeamColor.WHITE) {
+                    checkColor = ChessGame.TeamColor.BLACK;
+                    lUser = game.blackUsername();
+                } else if (color == ChessGame.TeamColor.BLACK) {
+                    checkColor = ChessGame.TeamColor.WHITE;
+                    lUser = game.whiteUsername();
+                }
+                if (game.game().isInCheckmate(checkColor)) {
+                    game.game().endGame();
+                    dataAccess.updateGame(game);
+                    String cString = lUser + " is in checkmate!" + username + " wins!\n[GAME] >>> ";
+                    ServerMessage cMessage =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, cString);
+                    connections.broadcastAll(gameId, cMessage);
+                } else if (game.game().isInCheck(checkColor)) {
+                    String cString = lUser + " is in check!\n[GAME] >>> ";
+                    ServerMessage cMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, cString);
+                    connections.broadcastAll(gameId, cMessage);
+                }
             } else {
                 var eMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
                 eMessage.setErrorMessage("Invalid Move!");

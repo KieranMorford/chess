@@ -8,14 +8,16 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static ui.EscapeSequences.*;
 
 public class DrawBoard {
-    public static String render(ChessBoard board, ChessGame.TeamColor teamColor, ChessPosition position) {
+
+    public static String render(ChessGame game, ChessGame.TeamColor teamColor, ChessPosition position) {
+        var board = game.getBoard();
         var sb = new StringBuilder();
         sb.append(ERASE_SCREEN);
         header(teamColor, sb);
         if (teamColor == ChessGame.TeamColor.WHITE) {
-            bodyWhite(board, sb, position);
+            bodyWhite(game, board, sb, position);
         } else if (teamColor == ChessGame.TeamColor.BLACK) {
-            bodyBlack(board, sb, position);
+            bodyBlack(game, board, sb, position);
         }
         header(teamColor, sb);
         sb.append(RESET_TEXT_COLOR).append(RESET_BG_COLOR);
@@ -23,13 +25,13 @@ public class DrawBoard {
         return sb.toString();
     }
 
-    private static void bodyWhite(ChessBoard board, StringBuilder sb, ChessPosition position) {
+    private static void bodyWhite(ChessGame game, ChessBoard board, StringBuilder sb, ChessPosition position) {
         for (int row = 8; row >= 1; row--) {
             sb.append(SET_TEXT_COLOR_RED);
             sb.append(SET_BG_COLOR_DARK_GREY);
             sb.append(" ").append(row).append(" ");
             for (int col = 1; col <= 8; col++) {
-                pieces(board, sb, row, col, position);
+                pieces(game, board, sb, row, col, position);
                 sb.append(" ");
             }
             sb.append(SET_TEXT_COLOR_RED);
@@ -39,13 +41,13 @@ public class DrawBoard {
         }
     }
 
-    private static void bodyBlack(ChessBoard board, StringBuilder sb, ChessPosition position) {
+    private static void bodyBlack(ChessGame game, ChessBoard board, StringBuilder sb, ChessPosition position) {
         for (int row = 1; row <= 8; row++) {
             sb.append(SET_TEXT_COLOR_RED);
             sb.append(SET_BG_COLOR_DARK_GREY);
             sb.append(" ").append(row).append(" ");
             for (int col = 8; col >= 1; col--) {
-                pieces(board, sb, row, col, position);
+                pieces(game, board, sb, row, col, position);
                 sb.append(" ");
             }
             sb.append(SET_TEXT_COLOR_RED);
@@ -55,7 +57,7 @@ public class DrawBoard {
         }
     }
 
-    private static void pieces(ChessBoard board, StringBuilder sb, int row, int col, ChessPosition position) {
+    private static void pieces(ChessGame game, ChessBoard board, StringBuilder sb, int row, int col, ChessPosition position) {
         Collection<ChessMove> moves = null;
         var pos = new ChessPosition(row, col);
         AtomicBoolean highlight = new AtomicBoolean(false);
@@ -69,7 +71,7 @@ public class DrawBoard {
                 }
                 highlight.set(true);
             }
-            moves = board.getPiece(position).pieceMoves(board, position);
+            moves = board.getPiece(pos).pieceMoves(board, pos);
             if (moves != null) {
                 for (ChessMove move : moves) {
                     if (move.getEndPosition().equals(pos) && (row + col) % 2 == 0) {
@@ -77,6 +79,7 @@ public class DrawBoard {
                         sb.append(SET_TEXT_COLOR_BLACK);
                         sb.append(SET_BG_COLOR_DARK_GREEN);
                     } else if (move.getEndPosition().equals(pos) && (row + col) % 2 == 0){
+                        sb.append(SET_BG_COLOR_GREEN);
                         sb.append(SET_BG_COLOR_GREEN);
                     }
                 }
