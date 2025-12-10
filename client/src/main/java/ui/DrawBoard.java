@@ -72,14 +72,12 @@ public class DrawBoard {
             moves = board.getPiece(position).pieceMoves(board, position);
             if (moves != null) {
                 for (ChessMove move : moves) {
-                    if (move.getEndPosition().equals(pos)) {
+                    if (move.getEndPosition().equals(pos) && (row + col) % 2 == 0) {
                         highlight.set(true);
                         sb.append(SET_TEXT_COLOR_BLACK);
-                        if ((row + col) % 2 == 0) {
-                            sb.append(SET_BG_COLOR_DARK_GREEN);
-                        } else{
-                            sb.append(SET_BG_COLOR_GREEN);
-                        }
+                        sb.append(SET_BG_COLOR_DARK_GREEN);
+                    } else if (move.getEndPosition().equals(pos) && (row + col) % 2 == 0){
+                        sb.append(SET_BG_COLOR_GREEN);
                     }
                 }
             }
