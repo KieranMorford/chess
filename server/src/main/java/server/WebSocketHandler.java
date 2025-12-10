@@ -131,12 +131,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                         .append(" to ").append(eCol).append(move.getEndPosition().getRow());
                 if (move.getPromotionPiece() == null) {
                     lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
-                    str.append(".");
+                    str.append(".\n[GAME] >>> ");
                 } else {
                     lGMessage = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, null, command.getCommandType());
-                    str.append(", and was promoted to ").append(move.getPromotionPiece().toString()).append(".");
+                    str.append(", and was promoted to ").append(move.getPromotionPiece().toString()).append(".\n[GAME] >>> ");
                 }
                 lGMessage.setGame(game.game());
+                lGMessage.setColor(color);
+                lGMessage.setMove(move);
+                lGMessage.setUsername(username);
                 dataAccess.updateGame(game);
                 connections.broadcastAll(gameId, lGMessage);
                 message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, str.toString(), command.getCommandType());

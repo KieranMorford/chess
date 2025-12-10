@@ -20,6 +20,7 @@ public class ServerMessage {
     String errorMessage;
     ChessGame.TeamColor color;
     ChessMove move;
+    String username;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -67,6 +68,14 @@ public class ServerMessage {
 
     public ChessMove getMove() {
         return this.move;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return this.username;
     }
 
     public void setErrorMessage(String errorMessage) {

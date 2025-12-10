@@ -32,7 +32,6 @@ public class GameClient implements Client, NotificationHandler {
     private ChessGame.TeamColor color;
     private ChessGame game;
     private final int id;
-    private final boolean player;
 
     public GameClient(REPL repl, String serverUrl, String authToken, ChessGame game, int id, ChessGame.TeamColor color) {
         this.repl = repl;
@@ -42,7 +41,6 @@ public class GameClient implements Client, NotificationHandler {
         this.color = color;
         this.game = game;
         this.id = id;
-        this.player = true;
 
         this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, color));
     }
@@ -55,7 +53,6 @@ public class GameClient implements Client, NotificationHandler {
         this.color = ChessGame.TeamColor.WHITE;
         this.game = game;
         this.id = id;
-        this.player = false;
 
         this.webSocketFacade.SendCommand(new ConnectCommand(this.authToken, this.id, null));
     }
@@ -63,38 +60,24 @@ public class GameClient implements Client, NotificationHandler {
     @Override
     public void notify(ServerMessage notification) {
         var serializer = new Gson();
-//        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.NOTIFICATION))
-        if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
+        if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
+            repl.printToConsole(notification.getErrorMessage());
+            repl.printToConsole("\n[GAME] >>> ");
+        } else if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
             if (!this.game.isGameFinished()) {
                 repl.printToConsole("You have forfeited the game!");
             }
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             game = notification.getGame();
-            var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
             var color = notification.getColor();
-            var str = new StringBuilder();
-            repl.printToConsole(DrawBoard.render(game.getBoard(), color, null));
-            if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {
-                str.append(moveData.getUsername()).append(" made a move from ")
-                        .append(moveData.getMove().getStartPosition().toString()).append(" to ")
-                        .append(moveData.getMove().getEndPosition().toString());
-                if (moveData.getMove().getPromotionPiece() != null) {
-                    str.append(", and was promoted to ").append(moveData.getMove().getPromotionPiece().toString()).append(".");
-                } else {
-                    str.append(".");
-                }
-            }
-            var board = DrawBoard.render(moveData.getGame().game().getBoard(), color, null);
+            var board = DrawBoard.render(notification.getGame().getBoard(), color, null);
             repl.printToConsole("\n");
             repl.printToConsole(board);
-            repl.printToConsole(str.toString());
-            if(!str.isEmpty()) {
+            if(notification.getMessage() != null) {
+                repl.printToConsole(notification.getMessage());
                 repl.printToConsole("\n");
             }
             repl.printToConsole("[GAME] >>> ");
-        } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.ERROR)) {
-            repl.printToConsole(notification.getErrorMessage());
-            repl.printToConsole("\n[GAME] >>> ");
         } else {
             repl.printToConsole(notification.getMessage());
         }
