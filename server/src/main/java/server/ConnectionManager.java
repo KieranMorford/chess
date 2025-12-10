@@ -28,6 +28,11 @@ public class ConnectionManager {
         holder.remove(session);
     }
 
+    public void remove(int id, String username) {
+        var holder = connections.get(id);
+        holder.remove(username);
+    }
+
     public void remove(int id) {
         connections.remove(id);
     }

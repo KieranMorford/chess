@@ -71,7 +71,7 @@ public class GameClient implements Client, NotificationHandler {
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             game = notification.getGame();
             var moveData = serializer.fromJson(notification.getMessage(), MakeMoveData.class);
-            var color = moveData.getColor();
+            var color = notification.getColor();
             var str = new StringBuilder();
             repl.printToConsole(DrawBoard.render(game.getBoard(), color, null));
             if (notification.getCommandType().equals(UserGameCommand.CommandType.MAKE_MOVE)) {

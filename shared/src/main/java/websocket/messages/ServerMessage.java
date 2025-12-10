@@ -1,6 +1,7 @@
 package websocket.messages;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import websocket.commands.UserGameCommand;
 
 import java.util.Objects;
@@ -17,6 +18,8 @@ public class ServerMessage {
     UserGameCommand.CommandType commandType;
     ChessGame game;
     String errorMessage;
+    ChessGame.TeamColor color;
+    ChessMove move;
 
     public enum ServerMessageType {
         LOAD_GAME,
@@ -46,16 +49,32 @@ public class ServerMessage {
         this.game = game;
     }
 
+    public ChessGame getGame() {
+        return this.game;
+    }
+
+    public void setColor(ChessGame.TeamColor color) {
+        this.color = color;
+    }
+
+    public ChessGame.TeamColor getColor() {
+        return this.color;
+    }
+
+    public void setMove(ChessMove move) {
+        this.move = move;
+    }
+
+    public ChessMove getMove() {
+        return this.move;
+    }
+
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
     public String getErrorMessage() {
         return this.errorMessage;
-    }
-
-    public ChessGame getGame() {
-        return this.game;
     }
 
     public UserGameCommand.CommandType getCommandType() {
