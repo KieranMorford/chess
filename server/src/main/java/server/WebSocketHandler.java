@@ -5,7 +5,6 @@ import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dataaccess.DataAccessException;
-import envelopes.MakeMoveData;
 import exceptions.BadRequestException;
 import exceptions.UnauthorizedException;
 import io.javalin.websocket.WsCloseContext;
