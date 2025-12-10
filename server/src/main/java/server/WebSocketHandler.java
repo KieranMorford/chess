@@ -99,19 +99,30 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
     }
 
     private void makeMove(int gameId, String username, MakeMoveCommand command, Session session) throws IOException, BadRequestException, DataAccessException, InvalidMoveException {
-        boolean check = dataAccess.getGame(gameId).game().isGameFinished();
         if (!dataAccess.getGame(gameId).game().isGameFinished()) {
             var serializer = new Gson();
             var move = command.getMove();
+            var game = dataAccess.getGame(gameId);
+            var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
+            ChessGame.TeamColor pColor = null;
+            if (username.equals(game.whiteUsername())) {
+                pColor = ChessGame.TeamColor.WHITE;
+            } else if (username.equals(game.blackUsername())) {
+                pColor = ChessGame.TeamColor.BLACK;
+            }
+            if (!color.equals(pColor)) {
+                var eMessage =  new ServerMessage(ServerMessage.ServerMessageType.ERROR);
+                eMessage.setErrorMessage("It's not your turn!");
+                connections.broadcastOne(gameId, eMessage, username);
+                return;
+            }
             if (dataAccess.getGame(gameId).game().getBoard().getPiece(move.getStartPosition()) != null) {
-                var game = dataAccess.getGame(gameId);
-                var color = game.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
                 ServerMessage lGMessage = null;
                 ServerMessage message = null;
                 game.game().makeMove(move);
                 var str = new StringBuilder();
-                int s = move.getStartPosition().getColumn();
-                int e = move.getEndPosition().getColumn();
+                int s = move.getStartPosition().getColumn() - 1;
+                int e = move.getEndPosition().getColumn() - 1;
                 char[] alpha = "abcdefgh".toCharArray();
                 var sCol = Character.toString(alpha[s]);
                 var eCol = Character.toString(alpha[e]);
