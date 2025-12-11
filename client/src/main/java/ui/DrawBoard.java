@@ -64,21 +64,21 @@ public class DrawBoard {
         if (position != null) {
             if (position.equals(pos)) {
                 sb.append(SET_TEXT_COLOR_BLACK);
-                if ((row + col) % 2 == 0) {
-                    sb.append(SET_BG_COLOR_DARK_GREEN);
-                } else {
-                    sb.append(SET_BG_COLOR_GREEN);
-                }
+                sb.append(SET_BG_COLOR_BLUE);
                 highlight.set(true);
             }
-            moves = board.getPiece(pos).pieceMoves(board, pos);
+            if (game.getBoard().getPiece(position) != null) {
+                moves = game.validMoves(position);
+//                moves = board.getPiece(position).pieceMoves(board, position);
+            }
             if (moves != null) {
                 for (ChessMove move : moves) {
                     if (move.getEndPosition().equals(pos) && (row + col) % 2 == 0) {
                         highlight.set(true);
                         sb.append(SET_TEXT_COLOR_BLACK);
                         sb.append(SET_BG_COLOR_DARK_GREEN);
-                    } else if (move.getEndPosition().equals(pos) && (row + col) % 2 == 0){
+                    } else if (move.getEndPosition().equals(pos) && (row + col) % 2 == 1){
+                        highlight.set(true);
                         sb.append(SET_BG_COLOR_GREEN);
                         sb.append(SET_BG_COLOR_GREEN);
                     }
@@ -92,7 +92,7 @@ public class DrawBoard {
             sb.append(SET_TEXT_COLOR_BLACK);
             sb.append(SET_BG_COLOR_WHITE);
         }
-        var piece = board.getPiece(pos);
+        var piece = game.getBoard().getPiece(pos);
         if (piece != null && piece.getTeamColor() == ChessGame.TeamColor.WHITE) {
             if (piece.getPieceType() == ChessPiece.PieceType.PAWN) {
                 sb.append(" ").append(WHITE_PAWN);

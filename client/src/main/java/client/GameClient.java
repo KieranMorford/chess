@@ -4,7 +4,6 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import com.google.gson.Gson;
 import serverfacade.NotificationHandler;
 import serverfacade.ServerFacade;
 import serverfacade.WebSocketFacade;
@@ -64,7 +63,7 @@ public class GameClient implements Client, NotificationHandler {
             repl.printToConsole("\n[GAME] >>> ");
         } else if (notification.getCommandType().equals(UserGameCommand.CommandType.RESIGN)) {
             if (!this.game.isGameFinished()) {
-                repl.printToConsole("You have forfeited the game!\n[GAME] >>> ");
+                repl.printToConsole(notification.getUsername() + " has forfeited the game!\n[GAME] >>> ");
             }
         } else if (notification.getServerMessageType().equals(ServerMessage.ServerMessageType.LOAD_GAME)) {
             game = notification.getGame();
@@ -75,7 +74,14 @@ public class GameClient implements Client, NotificationHandler {
                 repl.printToConsole(notification.getMessage());
                 repl.printToConsole("\n");
             }
-            repl.printToConsole("[GAME] >>> ");
+            if(notification.getGame().isGameFinished()) {
+                repl.printToConsole(notification.getLosername() + " is in checkmate!");
+            } else if (notification.getGame().isInCheck(notification.getColor())) {
+                repl.printToConsole(notification.getLosername() + " is in check!");
+            } else if (notification.getGame().isInStalemate(notification.getColor())) {
+                repl.printToConsole("It's a stalemate!");
+            }
+            repl.printToConsole("\n[GAME] >>> ");
         } else {
             repl.printToConsole(notification.getMessage());
         }
@@ -218,7 +224,7 @@ public class GameClient implements Client, NotificationHandler {
             }
             pos = new ChessPosition(row, nCol);
             if (game.getBoard().getPiece(pos) == null) {
-                throw new Exception("No piece in selected spot");
+                throw new Exception("No piece in selected spot.");
             }
         } else {
             throw new Exception("Expected: <COLROW>");

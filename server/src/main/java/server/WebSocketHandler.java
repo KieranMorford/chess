@@ -88,7 +88,7 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
         var color = command.getColor();
         if (color == null) {
             message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                    username + " is observing the game.\n[Game] >>> ", command.getCommandType());
+                    username + " is observing the game.\n[GAME] >>> ", command.getCommandType());
             color = ChessGame.TeamColor.WHITE;
         } else {
             message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION,
@@ -130,6 +130,15 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 char[] alpha = "abcdefgh".toCharArray();
                 var sCol = Character.toString(alpha[s]);
                 var eCol = Character.toString(alpha[e]);
+                ChessGame.TeamColor checkColor = null;
+                String lUser = null;
+                if(color == ChessGame.TeamColor.WHITE) {
+                    checkColor = ChessGame.TeamColor.BLACK;
+                    lUser = game.blackUsername();
+                } else if (color == ChessGame.TeamColor.BLACK) {
+                    checkColor = ChessGame.TeamColor.WHITE;
+                    lUser = game.whiteUsername();
+                }
                 str.append(username).append(" made a move from ").append(sCol).append(move.getStartPosition().getRow())
                         .append(" to ").append(eCol).append(move.getEndPosition().getRow());
                 if (move.getPromotionPiece() == null) {
@@ -143,30 +152,22 @@ public class WebSocketHandler implements WsConnectHandler, WsMessageHandler, WsC
                 lGMessage.setColor(color);
                 lGMessage.setMove(move);
                 lGMessage.setUsername(username);
-                dataAccess.updateGame(game);
-                connections.broadcastAll(gameId, lGMessage);
-                message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, str.toString(), command.getCommandType());
-                connections.broadcastRest(gameId, message, username);
-                ChessGame.TeamColor checkColor = null;
-                String lUser = null;
-                if(color == ChessGame.TeamColor.WHITE) {
-                    checkColor = ChessGame.TeamColor.BLACK;
-                    lUser = game.blackUsername();
-                } else if (color == ChessGame.TeamColor.BLACK) {
-                    checkColor = ChessGame.TeamColor.WHITE;
-                    lUser = game.whiteUsername();
-                }
+                lGMessage.setLosername(lUser);
                 if (game.game().isInCheckmate(checkColor)) {
-                    game.game().endGame();
-                    dataAccess.updateGame(game);
                     String cString = lUser + " is in checkmate!" + username + " wins!\n[GAME] >>> ";
                     ServerMessage cMessage =  new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, cString);
                     connections.broadcastAll(gameId, cMessage);
+                    game.game().endGame();
+                    dataAccess.updateGame(game);
                 } else if (game.game().isInCheck(checkColor)) {
                     String cString = lUser + " is in check!\n[GAME] >>> ";
                     ServerMessage cMessage = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, cString);
                     connections.broadcastAll(gameId, cMessage);
                 }
+                dataAccess.updateGame(game);
+                connections.broadcastAll(gameId, lGMessage);
+                message = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, str.toString(), command.getCommandType());
+                connections.broadcastRest(gameId, message, username);
             } else {
                 var eMessage = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null);
                 eMessage.setErrorMessage("Invalid Move!");

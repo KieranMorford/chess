@@ -67,7 +67,7 @@ public class ChessGame {
             if (isInCheck(tempPiece.getTeamColor())) {
                 invalidMoves.add(move);
             }
-            board = tempBoard.clone();
+            board = tempBoard;
         }
         for (ChessMove move : invalidMoves) {
             moves.remove(move);
